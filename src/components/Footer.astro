@@ -1,0 +1,43 @@
+---
+
+---
+
+<footer>
+  <section>
+    <p>&copy; 2020 itskitto</p>
+  </section>
+  <section>
+    <p>
+      Built with  
+      <img src="/assets/astro.svg" alt="astro" width="25" height="75">
+    </p>
+  </section>
+</footer>
+
+<style lang="scss">
+  footer {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-top: 10%;
+    padding-top: 20px;
+
+    border-top: 1px solid lightgrey;
+
+    section > p {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+
+      font-size: .75rem;
+      font-weight: 300;
+    }
+
+    img {
+      height: 5%;
+    }
+  }
+</style>

@@ -1,0 +1,19 @@
+---
+
+---
+
+<span>
+  <slot></slot>
+</span>
+
+<style lang="scss">
+  span {
+  background-size: 100% 200%; 
+  background-image: linear-gradient(to bottom, #fff 50%, #F7942F 50%);
+  transition: background-position .2s ease-in-out, color .2s ease-in-out;
+
+    &:hover {
+      background-position: 0 100%;
+    }
+  }
+</style>

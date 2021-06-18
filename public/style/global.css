@@ -1,0 +1,18 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+html,
+body {
+  font-family: 'Roboto', sans-serif;
+  line-height: 1.25;
+  font-size: 1.15rem;
+  letter-spacing: 0.015rem;
+}
+
+body {
+  max-width: 760px;
+  width: 100%;
+  margin: 0 auto;
+}
