@@ -7,8 +7,19 @@ html,
 body {
   font-family: 'Roboto', sans-serif;
   line-height: 1.25;
-  font-size: 1.15rem;
+  font-size: 1.115rem;
   letter-spacing: 0.015rem;
+}
+
+a,
+a:visited {
+  text-decoration: underline;
+  color: #f7942f;
+  font-weight: 700;
+}
+
+a:hover {
+  color: #000;
 }
 
 body {
