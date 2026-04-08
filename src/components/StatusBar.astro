@@ -1,14 +1,14 @@
 ---
-import StatusTicker from './StatusTicker.astro'
-import { PanelLeftOpen } from 'lucide-astro'
+import StatusTicker from "./StatusTicker.astro";
+import { PanelLeftOpen } from "@lucide/astro";
 
 interface Props {
-  messages?: string[]
-  interval?: number
-  right?: string
+  messages?: string[];
+  interval?: number;
+  right?: string;
 }
 
-const { messages = [], interval, right } = Astro.props
+const { messages = [], interval, right } = Astro.props;
 ---
 
 <footer class="status-bar">
@@ -24,13 +24,15 @@ const { messages = [], interval, right } = Astro.props
   </button>
 
   <span class="status-bar__left">
-    {messages.length > 0 ? (
-      <StatusTicker messages={messages} interval={interval}>
-        <slot name="right" slot="right" />
-      </StatusTicker>
-    ) : (
-      <slot name="left" />
-    )}
+    {
+      messages.length > 0 ? (
+        <StatusTicker messages={messages} interval={interval}>
+          <slot name="right" slot="right" />
+        </StatusTicker>
+      ) : (
+        <slot name="left" />
+      )
+    }
   </span>
 
   <span class="status-bar__right">
@@ -100,24 +102,26 @@ const { messages = [], interval, right } = Astro.props
 
 <script>
   function initNavToggle() {
-    const navToggle = document.getElementById('nav-toggle')
-    if (!navToggle) return
+    const navToggle = document.getElementById("nav-toggle");
+    if (!navToggle) return;
 
     // Remove inline style on mobile so the CSS media query can show it.
     // Inline styles override scoped CSS selectors, so this is the reliable guard.
-    if (window.matchMedia('(max-width: 48em)').matches) {
-      navToggle.style.removeProperty('display')
+    if (window.matchMedia("(max-width: 48em)").matches) {
+      navToggle.style.removeProperty("display");
     }
 
-    navToggle.addEventListener('click', () => {
-      const isOpen = document.documentElement.classList.toggle('sidebar-mobile-open')
-      navToggle.setAttribute('aria-expanded', String(isOpen))
+    navToggle.addEventListener("click", () => {
+      const isOpen = document.documentElement.classList.toggle(
+        "sidebar-mobile-open",
+      );
+      navToggle.setAttribute("aria-expanded", String(isOpen));
       if (isOpen) {
-        const sidebar = document.getElementById('sidebar')
-        sidebar?.querySelector<HTMLElement>('a, button')?.focus()
+        const sidebar = document.getElementById("sidebar");
+        sidebar?.querySelector<HTMLElement>("a, button")?.focus();
       }
-    })
+    });
   }
 
-  document.addEventListener('astro:page-load', initNavToggle)
+  document.addEventListener("astro:page-load", initNavToggle);
 </script>
