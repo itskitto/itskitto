@@ -9,6 +9,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
+    "deploy": "wrangler deploy --config dist/server/wrangler.json",
     "astro": "astro"
   },
   "dependencies": {
@@ -29,7 +30,8 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260408.1",
-    "@types/canvas-confetti": "^1.9.0"
+    "@types/canvas-confetti": "^1.9.0",
+    "wrangler": "^4.0.0"
   },
   "pnpm": {
     "allowBuild": ["core-js-pure", "esbuild", "workerd"]
