@@ -5,6 +5,10 @@ import { SIDEBAR, STATUS_MESSAGES } from '../config'
 import { getNav } from '../lib/nav'
 
 const nav = await getNav()
+const turnstileSiteKey =
+  typeof import.meta.env.PUBLIC_TURNSTILE_SITE_KEY === 'string'
+    ? import.meta.env.PUBLIC_TURNSTILE_SITE_KEY.trim()
+    : ''
 
 const contactMethods = [
   { label: 'Email', value: 'hello@itskitto.dev', href: 'mailto:hello@itskitto.dev' },
@@ -116,14 +120,20 @@ const contactMethods = [
             <textarea class="form-textarea" id="message" name="message" rows="6" placeholder="Tell me about your project or what you're working on..."></textarea>
           </div>
 
-          <div
-            class="cf-turnstile"
-            data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY}
-            data-theme="auto"
-            data-callback="onTurnstileVerified"
-            data-expired-callback="onTurnstileExpired"
-            data-error-callback="onTurnstileExpired"
-          ></div>
+          {turnstileSiteKey ? (
+            <div
+              class="cf-turnstile"
+              data-sitekey={turnstileSiteKey}
+              data-theme="auto"
+              data-callback="onTurnstileVerified"
+              data-expired-callback="onTurnstileExpired"
+              data-error-callback="onTurnstileExpired"
+            ></div>
+          ) : (
+            <p class="form-field-error">
+              Human verification is temporarily unavailable. Please email hello@itskitto.dev instead.
+            </p>
+          )}
 
           <div class="form-footer" hidden>
             <button class="btn btn--primary form-submit" type="submit">
