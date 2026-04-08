@@ -1,0 +1,57 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../../layouts/BaseLayout.astro'
+import Breadcrumb from '../../../components/Breadcrumb.astro'
+import PostCard from '../../../components/PostCard.astro'
+import { SIDEBAR, STATUS_MESSAGES } from '../../../config'
+import { getNav } from '../../../lib/nav'
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection('posts', ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true
+  )
+
+  const categories = [...new Set(allPosts.map((p) => p.data.category))]
+
+  return categories.map((cat) => ({
+    params: { category: cat.toLowerCase().replace(/\s+/g, '-') },
+    props: {
+      categoryLabel: cat,
+      filteredPosts: [...allPosts]
+        .filter((p) => p.data.category === cat)
+        .sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime()),
+    },
+  }))
+}
+
+const { categoryLabel, filteredPosts } = Astro.props
+const nav = await getNav()
+---
+
+<BaseLayout
+  title={`Posts — ${categoryLabel}`}
+  sidebar={{ ...SIDEBAR, nav }}
+  status={{ messages: STATUS_MESSAGES }}
+>
+  <Breadcrumb
+    crumbs={[
+      { label: 'Index', href: '/' },
+      { label: 'Posts', href: '/posts' },
+      { label: categoryLabel },
+    ]}
+  />
+
+  <div class="post-list">
+    {filteredPosts.map((post) => <PostCard post={post} />)}
+  </div>
+</BaseLayout>
+
+<style>
+  .post-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+    max-inline-size: 44rem;
+    padding-block-start: var(--s1);
+  }
+</style>

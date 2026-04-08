@@ -1,0 +1,458 @@
+---
+import { getCollection, render } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumb from '../../components/Breadcrumb.astro'
+import PostEnding from '../../components/PostEnding.tsx'
+import { SIDEBAR, STATUS_MESSAGES } from '../../config'
+import { getNav } from '../../lib/nav'
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects', ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true
+  )
+  return projects.map((project) => ({ params: { id: project.id }, props: { project } }))
+}
+
+const { project } = Astro.props
+const { Content, headings } = await render(project)
+
+const nav = await getNav()
+
+const toc = headings.filter((h) => h.depth <= 3)
+
+const { title, description, status, type, role, stack, startDate, endDate, url, github } = project.data
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()
+
+const timeline = endDate
+  ? `${fmtDate(startDate)} to ${fmtDate(endDate)}`
+  : `${fmtDate(startDate)} to Present`
+
+const statusLabel: Record<string, string> = {
+  active: 'Active',
+  complete: 'Complete',
+  archived: 'Archived',
+}
+---
+
+<BaseLayout
+  title={`${title} — Nicholas Khrangtong`}
+  description={description}
+  sidebar={{
+    ...SIDEBAR,
+    nav,
+  }}
+  status={{ messages: STATUS_MESSAGES }}
+>
+  <div class="progress-bar" id="reading-progress" aria-hidden="true"></div>
+
+  <Breadcrumb
+    crumbs={[
+      { label: 'Index', href: '/' },
+      { label: 'Projects', href: '/projects' },
+      { label: title },
+    ]}
+  />
+
+  <div class="project-layout">
+
+    <!-- Left column: info panel + optional ToC -->
+    <div class="project-col">
+
+      <aside class="info-panel" aria-label="Project details">
+        <dl class="info-list">
+
+          <div class="info-row">
+            <dt class="info-label section-label">Status</dt>
+            <dd class={`info-value info-status info-status--${status}`}>
+              {status === 'active' && <span class="info-dot" aria-hidden="true" />}
+              {statusLabel[status]}
+            </dd>
+          </div>
+
+          <div class="info-row">
+            <dt class="info-label section-label">Type</dt>
+            <dd class="info-value info-capitalize">{type}</dd>
+          </div>
+
+          <div class="info-row">
+            <dt class="info-label section-label">Role</dt>
+            <dd class="info-value">{role}</dd>
+          </div>
+
+          <div class="info-row">
+            <dt class="info-label section-label">Timeline</dt>
+            <dd class="info-value">{timeline}</dd>
+          </div>
+
+          <div class="info-row info-row--stack">
+            <dt class="info-label section-label">Stack</dt>
+            <dd class="info-value">
+              <ul class="stack-list">
+                {stack.map((tech) => (
+                  <li class="stack-pill">{tech}</li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+
+          {(url || github) && (
+            <div class="info-row info-row--links">
+              <dt class="info-label section-label">Links</dt>
+              <dd class="info-value">
+                <ul class="link-list">
+                  {url && (
+                    <li>
+                      <a class="info-link" href={url} target="_blank" rel="noopener">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                          <path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Live site
+                      </a>
+                    </li>
+                  )}
+                  {github && (
+                    <li>
+                      <a class="info-link" href={github} target="_blank" rel="noopener">
+                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                          <path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        GitHub
+                      </a>
+                    </li>
+                  )}
+                </ul>
+              </dd>
+            </div>
+          )}
+
+        </dl>
+      </aside>
+
+      {toc.length > 0 && (
+        <nav class="toc" aria-label="On this page">
+          <p class="toc__heading section-label">On this page</p>
+          <ol class="toc__list">
+            {toc.map((h, i) => (
+              <li class="toc__item" style={`padding-inline-start: ${(h.depth - 2) * 0.75}rem`}>
+                <a class="toc__link" href={`#${h.slug}`}>
+                  {String(i + 1).padStart(2, '0')}. {h.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )}
+    </div>
+
+    <!-- Article -->
+    <article class="project-article">
+      <header class="project__header">
+        <div class="project__meta meta-row">
+          <time datetime={startDate.toISOString()}>{fmtDate(startDate)}</time>
+          <span class="project__type-badge">{type}</span>
+        </div>
+        <h1 class="project__title" transition:name={`project-title-${project.id}`}>{title}</h1>
+        <p class="project__description">{description}</p>
+      </header>
+
+      <div class="project__body">
+        <Content />
+      </div>
+
+      <PostEnding client:visible />
+    </article>
+  </div>
+</BaseLayout>
+
+<style>
+  :global(.breadcrumb) {
+    margin-inline-start: calc(12rem + var(--s3));
+  }
+
+  .project-layout {
+    display: flex;
+    gap: var(--s3);
+    align-items: flex-start;
+    padding-block-start: var(--s1);
+  }
+
+  /* Left column */
+  .project-col {
+    flex-shrink: 0;
+    inline-size: 12rem;
+    position: sticky;
+    inset-block-start: calc(var(--statusbar-height) + var(--s2));
+    align-self: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: var(--s2);
+    min-block-size: calc(100vh - var(--statusbar-height) - var(--s2) * 2);
+  }
+
+  /* Info panel */
+  .info-panel {
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+  }
+
+  .info-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-block: 0.6rem;
+    padding-inline: 0.75rem;
+    border-block-end: var(--border-thin) solid var(--color-border);
+  }
+
+  .info-row:last-child {
+    border-block-end: none;
+  }
+
+  /* .info-label base styles via .section-label */
+
+  .info-value {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-text-secondary);
+    line-height: 1.4;
+  }
+
+  .info-capitalize { text-transform: capitalize; }
+
+  .info-status {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 600;
+  }
+
+  .info-status--active { color: var(--color-available); }
+  .info-status--complete { color: var(--color-text-muted); }
+  .info-status--archived { color: var(--color-text-muted); }
+
+  .info-dot {
+    position: relative;
+    display: inline-block;
+    inline-size: 6px;
+    block-size: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .info-dot::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: currentColor;
+      animation: dot-ping 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+  }
+
+  /* Stack pills */
+  .info-row--stack .info-value { display: block; }
+
+  .stack-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-block-start: 0.25rem;
+  }
+
+  .stack-pill {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: var(--border-thin) solid var(--color-border);
+    padding-block: 0.2rem;
+    padding-inline: 0.45rem;
+    border-radius: var(--border-radius-sm);
+    white-space: nowrap;
+  }
+
+  /* Links */
+  .link-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-block-start: 0.25rem;
+  }
+
+  .info-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-brand);
+    text-decoration: none;
+    transition: opacity 0.1s;
+  }
+
+  .info-link:hover { opacity: 0.75; }
+
+  /* ToC — layout-specific overrides; shared styles are in global.css */
+  .toc {
+    flex-shrink: 0;
+    border-block-start: var(--border-thin) solid var(--color-border);
+    padding-block-start: var(--s1);
+  }
+
+  /* Article */
+  .project-article {
+    flex: 1;
+    max-inline-size: 44rem;
+    min-inline-size: 0;
+  }
+
+  .project__header {
+    margin-block-end: var(--s2);
+  }
+
+  .project__meta {
+    /* base styles via .meta-row */
+    margin-block-end: var(--s1);
+  }
+
+  .project__type-badge {
+    background: var(--color-surface);
+    border: var(--border-thin) solid var(--color-border);
+    padding-block: 0.15rem;
+    padding-inline: 0.5rem;
+    border-radius: var(--border-radius-sm);
+    font-size: var(--text-xs);
+    text-transform: capitalize;
+  }
+
+  .project__title {
+    font-family: var(--font-serif);
+    font-size: clamp(1.75rem, 3vw + 1rem, 2.75rem);
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin-block-end: var(--s1);
+  }
+
+  .project__description {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    max-inline-size: 52ch;
+  }
+
+  /* Prose */
+  .project__body :global(h2) {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-block: var(--s2) var(--s-1);
+  }
+
+  .project__body :global(h3) {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-block: var(--s1) var(--s-1);
+  }
+
+  .project__body :global(p) {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--color-text-secondary);
+    max-inline-size: 60ch;
+    margin-block-end: var(--s1);
+  }
+
+  .project__body :global(a) {
+    color: var(--color-brand);
+    text-underline-offset: 0.2em;
+  }
+
+  .project__body :global(ul),
+  .project__body :global(ol) {
+    padding-inline-start: var(--s1);
+    margin-block-end: var(--s1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+  }
+
+  .project__body :global(li) {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--color-text-secondary);
+  }
+
+  /* Prevent code blocks from causing page-level horizontal scroll */
+  .project__body {
+    overflow-x: hidden;
+  }
+
+  .project__body :global(pre),
+  .project__body :global(pre.astro-code) {
+    max-inline-size: 100%;
+    overflow-x: auto;
+  }
+
+  @media (max-width: 48em) {
+    :global(.breadcrumb) {
+      margin-inline-start: 0;
+    }
+
+    .project-layout {
+      flex-direction: column;
+      gap: var(--s2);
+    }
+
+    .project-col {
+      inline-size: auto;
+      position: static;
+      min-block-size: auto;
+    }
+
+    .info-panel {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
+    }
+
+    .info-list {
+      display: contents;
+    }
+
+    .info-row {
+      border-block-end: none;
+      border: var(--border-thin) solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+    }
+
+    .toc {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  import { initReadingProgress } from '../../lib/reading-progress'
+  import { initTocObserver } from '../../lib/toc-observer'
+
+  function initProject(): void {
+    initReadingProgress('reading-progress', '.project-article')
+    initTocObserver('.project__body h2, .project__body h3')
+  }
+
+  document.addEventListener('astro:page-load', initProject)
+</script>

@@ -1,0 +1,39 @@
+---
+title: Greenline Landscaping
+description: A business management platform built from scratch for a landscaping company. Covers scheduling, quoting, client management, and crew dispatch.
+status: active
+type: freelance
+role: Lead Engineer
+stack: [React, FastAPI, PostgreSQL, Temporal, TanStack Query]
+startDate: 2024-09-01
+url: https://greenlinelandscaping.com
+draft: false
+---
+
+Greenline came to me with a problem that's common for small service businesses that have grown past a certain point: the systems holding everything together were a collection of spreadsheets, group texts, and institutional knowledge living in one person's head. Scheduling was done manually, quotes went out as PDFs with no tracking, and figuring out which crew was where on a given day required calling someone. It worked until it didn't.
+
+The engagement started as a scoping conversation and turned into a full build. The scope covered four main areas: client and property management, quote generation and approval, job scheduling and crew dispatch, and a basic reporting layer so the owner could see where revenue was coming from week to week.
+
+## Deciding what to build first
+
+The temptation on a project like this is to try to solve everything at once, and the client initially wanted exactly that — a complete replacement of all their current tools on day one. I pushed back on this. The risk of building a system that tries to do everything before anyone has used it is that you end up with something perfectly engineered for a workflow that doesn't match how the business actually operates.
+
+We started with quotes. It was the most acute pain point: quotes were going out inconsistently, follow-up was manual, and there was no record of what had been sent to whom. Getting quotes right meant I had to understand the business's pricing logic deeply, which also turned out to be the foundation for scheduling. That ordering was the right call.
+
+## The scheduling problem
+
+Scheduling is the core of the product and the hardest part to get right. A landscaping operation has real constraints: crew sizes, equipment availability, geography, weather dependencies, client preferences. All of them interact. A job scheduled for Tuesday morning might need to shift if it rained Monday and the site isn't dry enough, and that shift ripples into everything else.
+
+The approach I took was to model jobs and assignments separately. A job is a unit of work with its own requirements. An assignment is the binding of a job to a crew and a time slot. This sounds obvious until you try to build it and realize how many edge cases live in that gap — split jobs, recurring jobs, partial completions, and the fact that crews don't always have consistent compositions from week to week.
+
+Temporal handles the long-running workflow logic: job lifecycle transitions, reminder sends, follow-up tasks that need to happen at specific times. It was a deliberate choice over cron jobs because the failure recovery story is much better, and I'd worked through the limitations of cron-based job management in a previous project. Temporal's visibility into in-flight workflows also means the client can see exactly what state a job is in, which turned out to matter more than I expected.
+
+## What I'm still working through
+
+The reporting layer is functional but not great. It answers the basic questions: revenue by week, jobs by crew, average job duration. But it doesn't yet give the kind of operational insight that would let the owner make proactive decisions. I have a clearer picture now of what that looks like after watching how the data gets used in practice, and it's a different shape than what I originally designed.
+
+The mobile experience for crew members is also something I want to revisit. The current implementation is responsive but it was designed desktop-first, and the people using it in the field are on phones. That's a gap I've noted.
+
+## What's working
+
+Quotes are out faster, more consistent, and tracked. The owner can see open quotes, accepted quotes, and what's expired without touching a spreadsheet. Scheduling has moved entirely into the platform, and the crew dispatch view has been the most used feature by a significant margin. That part worked well because I spent time with the people doing dispatch before building it, not just the owner.

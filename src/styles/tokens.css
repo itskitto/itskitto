@@ -1,0 +1,106 @@
+@property --sidebar-width {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 13rem;
+}
+
+:root {
+  /* Modular scale (ratio 1.5) */
+  --ratio: 1.5;
+  --s-1: calc(var(--s0) / var(--ratio));   /* ~0.667rem */
+  --s0: 1rem;
+  --s1: calc(var(--s0) * var(--ratio));    /* 1.5rem   */
+  --s2: calc(var(--s1) * var(--ratio));    /* 2.25rem  */
+  --s3: calc(var(--s2) * var(--ratio));    /* 3.375rem */
+  --s4: calc(var(--s3) * var(--ratio));    /* 5.0625rem */
+
+  /* Measure */
+  --measure: 60ch;
+
+  /* Base colors */
+  --color-text: hsl(215 15% 12%);
+  --color-text-secondary: hsl(215 10% 38%);
+  --color-text-muted: hsl(215 8% 58%);
+  --color-bg: hsl(0 0% 100%);
+  --color-border: hsl(35 15% 86%);
+  --color-border-strong: hsl(35 15% 72%);
+  --color-surface: hsl(35 20% 97%);
+
+  /* Brand — warm orange */
+  --color-brand: hsl(35 92% 52%);
+  --color-brand-muted: hsl(35 80% 90%);
+
+  /* Accent — crimson */
+  --color-accent: hsl(5 62% 40%);
+  --color-accent-hover: hsl(5 62% 32%);
+
+  /* Error — red */
+  --color-error: hsl(5 78% 50%);
+
+  /* Availability — green */
+  --color-available: hsl(140 60% 45%);
+  --color-available-border: hsl(140 50% 70%);
+  --color-available-bg: hsla(140, 50%, 70%, 0.25);
+
+  /* Dark chrome — charcoal */
+  --color-chrome: hsl(215 18% 12%);
+  --color-chrome-hover: hsl(215 15% 20%);
+  --color-chrome-border: hsl(215 12% 20%);
+  --color-chrome-text: hsl(35 10% 88%);
+  --color-chrome-text-muted: hsl(215 8% 55%);
+
+  /* Sidebar */
+  --sidebar-width: 13rem;
+  --sidebar-collapsed-width: 3.5rem;
+  --sidebar-bg: hsl(35 20% 97%);
+
+  /* Typography */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Instrument Serif', Georgia, serif;
+  --font-mono: 'JetBrains Mono', 'Cascadia Code', ui-monospace, monospace;
+
+  /* Type scale */
+  --text-2xs: 0.65rem;
+  --text-xs: 0.7rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+
+  /* Tracking (letter-spacing) */
+  --tracking-tight: -0.01em;
+  --tracking-wide: 0.08em;
+  --tracking-label: 0.1em;
+
+  /* Borders */
+  --border-thin: 1px;
+  --border-radius-sm: 0.1875rem;
+  --border-radius: 0.5rem;
+  --border-radius-full: 100vmax;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px hsl(0 0% 0% / 0.06);
+  --shadow-md: 0 4px 8px hsl(0 0% 0% / 0.10);
+
+  /* Easing */
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Status bar */
+  --statusbar-height: 2rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-text: hsl(35 10% 92%);
+    --color-text-secondary: hsl(35 8% 65%);
+    --color-text-muted: hsl(35 6% 45%);
+    --color-bg: hsl(215 18% 10%);
+    --color-border: hsl(215 12% 22%);
+    --color-border-strong: hsl(215 12% 32%);
+    --color-surface: hsl(215 15% 14%);
+    --sidebar-bg: hsl(215 15% 12%);
+    --color-error: hsl(5 85% 62%);
+    --color-accent: hsl(5 70% 58%);
+    --color-accent-hover: hsl(5 70% 48%);
+  }
+}

@@ -1,0 +1,73 @@
+---
+import { getCollection } from 'astro:content'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import Breadcrumb from '../../components/Breadcrumb.astro'
+import ProjectCard from '../../components/ProjectCard.astro'
+import { SIDEBAR, STATUS_MESSAGES } from '../../config'
+import { getNav } from '../../lib/nav'
+
+const allProjects = await getCollection('projects', ({ data }) =>
+  import.meta.env.PROD ? !data.draft : true
+)
+
+const projects = [...allProjects].sort(
+  (a, b) => b.data.startDate.getTime() - a.data.startDate.getTime()
+)
+
+const nav = await getNav()
+---
+
+<BaseLayout
+  title="Projects — Nicholas Khrangtong"
+  description="A running log of what I'm building — client work, personal projects, and open-source."
+  sidebar={{ ...SIDEBAR, nav }}
+  status={{ messages: STATUS_MESSAGES }}
+>
+  <Breadcrumb crumbs={[{ label: 'Index', href: '/' }, { label: 'Projects' }]} />
+
+  <div class="projects-layout">
+    <header class="projects-header">
+      <h1 class="projects-title">Projects</h1>
+      <p class="projects-lead">
+        A running log of what I'm building. Client work, personal projects, and
+        the occasional experiment. Each one gets a write-up.
+      </p>
+    </header>
+
+    <div class="project-list">
+      {projects.map((project) => <ProjectCard project={project} />)}
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .projects-layout {
+    max-inline-size: 44rem;
+    padding-block-start: var(--s1);
+  }
+
+  .projects-header {
+    margin-block-end: var(--s2);
+  }
+
+  .projects-title {
+    font-size: clamp(1.75rem, 3vw + 1rem, 2.75rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-block-end: var(--s-1);
+  }
+
+  .projects-lead {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    max-inline-size: 52ch;
+  }
+
+  .project-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+  }
+</style>

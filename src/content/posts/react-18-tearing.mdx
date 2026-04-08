@@ -1,0 +1,72 @@
+---
+title: Deep Dives -  Concurrent Rendering and the Tearing Problem
+description: Concurrent rendering gave React some powerful opportunities but it also opened a window for a subtle bug called tearing. Here's what it is, when it happens, and how React solves it.
+pubDate: 2026-01-15
+category: React
+draft: false
+readTime: 6
+ref: REACT
+---
+
+This article is the first of many in exploring and understanding the inner workings of the technology that I use everyday. Some of these articles will present my own personal deep dive into topics I'm interested in, sometimes they're already well discussed, other times maybe not. Then other articles might be more code exploratory including samples and a post mortem of my findings to follow.
+
+First up, tearing in React!
+
+## What tearing is
+
+In short: [two parts of your UI rendering against inconsistent versions of the same state](https://github.com/reactwg/react-18/discussions/69), at the same time.
+
+Before React 18, this wasn't something you had to think about because React rendered your entire component tree in one go, it was a synchronous process. Every component ran, everything committed, and the whole thing was working against the same snapshot of state. React 18 changed that by introducing concurrent rendering, where React can now pause a render mid-tree, hand control back to the browser to handle higher priority work, and then resume. This is genuinely great for perceived performance and UI responsiveness, but it creates a gap that didn't exist before. If something outside of React mutates state while React is paused, components that rendered before the pause are working with one version of the world and components that render after are working with a different one.
+
+## The incident that forced the ecosystem to respond
+
+The most concrete version of this problem played out publicly in the react-redux ecosystem when React 18 shipped, and it's worth understanding because it shaped the API React provides today.
+
+React-redux v7 subscribed components to the Redux store using a pattern built on `useReducer` and `useEffect`. Each connected component maintained its own local copy of the relevant slice of state, and an effect-based subscription kept it in sync with the store. In synchronous React, this was fine because effects always ran after the entire tree committed, so by the time any subscription update fired, the render was already done and consistent. The pattern worked in production for years across thousands of applications.
+
+What React 18's concurrent mode did was invalidate that assumption. When `startTransition` or Suspense-driven renders came into play, React could now pause mid-tree, and the Redux store could update during that pause. The react-redux team had actually been [tracking concurrent mode compatibility](https://github.com/reduxjs/react-redux/issues/1351) as a concern since React first started previewing concurrent features, but the full scope of the problem only became clear once React 18 shipped. A simplified version of what v7 was doing internally looked something like this:
+
+```typescript
+function useSelector(selector) {
+  const store = useContext(StoreContext)
+  const [selected, setSelected] = useState(() => selector(store.getState()))
+
+  useEffect(() => {
+    return store.subscribe(() => {
+      setSelected(selector(store.getState()))
+    })
+  }, [store, selector])
+
+  return selected
+}
+```
+
+The vulnerability is in the `useState` initialization. Each component instance calls `useState` at the moment React renders it, capturing the store's current state at that point in time. If the store updates between rendering component A and rendering component B during a concurrent pass, those two components initialize from different snapshots. The `useEffect` subscription wires up after commit, which is already too late. Both components commit to the DOM with inconsistent values, and the same store is showing two different things on screen simultaneously.
+
+This wasn't theoretical or limited to contrived examples. Mark Erikson, who maintains react-redux, and members of the React core team including Dan Abramov worked through the problem and its constraints together in [public](https://github.com/reduxjs/react-redux/issues/1351) [threads](https://github.com/reduxjs/react-redux/issues/1740) across the [React 18 working group on GitHub](https://github.com/reactwg/react-18/discussions/70). It affected every application using react-redux with concurrent features enabled, which is why the response had to happen at the infrastructure level rather than as advice to individual application developers.
+
+The React team shipped `useSyncExternalStore` as a first-class API specifically to give library authors a way out of this problem, and react-redux v8 adopted it. From a user perspective the migration was invisible. Internally, `useSelector` became something much closer to this:
+
+```typescript
+function useSelector(selector) {
+  const store = useContext(StoreContext)
+  return useSyncExternalStore(
+    store.subscribe,
+    () => selector(store.getState())
+  )
+}
+```
+
+The behavioral difference is significant even though the code looks similar. React calls `getSnapshot` once to establish a baseline at the start of the render pass, then checks it again at the end. If the store mutated in between, the snapshot is stale, React discards the in-progress tree, and re-renders everything synchronously so that every component reads from the same consistent value. Andrew Clark from the React core team documented the reasoning behind that tradeoff in [the discussion that also tracked the API's evolution from `useMutableSource`](https://github.com/reactwg/react-18/discussions/86) — the short version being that brief tearing is almost always a worse experience than the overhead of a synchronous re-render. You provide `useSyncExternalStore` a subscribe function, a getSnapshot function to read the current value, and an optional server snapshot for SSR, and React handles the rest.
+
+## Where the ecosystem still disagrees
+
+Daishi Kato, who built Zustand and Jotai, has written about a genuine design tension here. Jotai deliberately does not use `useSyncExternalStore` internally, and the reasoning is worth engaging with rather than dismissing. His position is that the synchronous constraint `useSyncExternalStore` imposes is partially incompatible with time slicing, which is one of concurrent rendering's most valuable properties. Forcing a synchronous re-render when a store updates mid-pass means you're partially giving back the scheduling flexibility that concurrent mode was meant to provide, and for some use cases he argues that brief inconsistency is an acceptable tradeoff for better cooperation with the scheduler. He's documented that tradeoff [here](https://blog.axlight.com/posts/why-use-sync-external-store-is-not-used-in-jotai/) and it gets into some genuinely nuanced design territory if you want to go deeper. He also put together a [test harness](https://github.com/dai-shi/will-this-react-global-state-work-in-concurrent-rendering) that checks popular state libraries for tearing and branching behavior under concurrent rendering, which is probably the most cited empirical reference on the topic in the community.
+
+## Where you're most likely to run into this
+
+If you're using Redux Toolkit, Zustand, or a similarly well-maintained library, they've already handled this at the library level. Where you need to be more careful is when you're rolling your own store with module-level state and pub/sub, integrating a third-party state system that hasn't updated its React adapter, or reading from browser APIs like `navigator.onLine` or `localStorage` directly during a render. Those are mutable external values React has no visibility into, and they carry the same risk.
+
+Mark Erikson's [guide to React rendering behavior](https://blog.isquaredsoftware.com/2020/05/blogged-answers-a-mostly-complete-guide-to-react-rendering-behavior/) is probably the most thorough community resource on how all of this fits together, updated for React 18 with specific coverage of how external store updates interact with the concurrent rendering pipeline.
+
+The other practical thing worth keeping in mind is that `startTransition` is the opt-in. If you're not using it, `useDeferredValue`, or Suspense with streaming, you're still in synchronous rendering territory and tearing can't happen. As concurrent features become more common in library code and in React's own ecosystem though, this is worth having on your radar rather than discovering it the same way we did. The react-redux story shows the mainstream answer, and `useSyncExternalStore` is what most of the ecosystem has converged on, but the tradeoffs are real and different libraries are still making different calls based on their priorities.

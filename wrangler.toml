@@ -1,0 +1,8 @@
+name = "itskitto"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Secrets are set via `wrangler secret put` or the Cloudflare dashboard.
+# For local development, create a .dev.vars file (gitignored) with:
+#   TURNSTILE_SECRET_KEY=<your-secret-key>
+#   RESEND_API_KEY=<your-resend-api-key>

@@ -1,0 +1,35 @@
+---
+title: Sandbox
+description: A personal FigJam-style canvas for organizing code snippets, project POCs, and technical notes spatially rather than in a linear list.
+status: active
+type: personal
+role: Creator
+stack: [React, TypeScript, Supabase, Motion]
+startDate: 2025-11-01
+url: https://sandbox.itskitto.dev
+draft: false
+---
+
+I've always had a problem with how I store and revisit technical work. Notes apps are fine for writing. GitHub is fine for code that's actually a project. But there's a large category of things that fall in between — a snippet that solves a problem I'll definitely run into again, a proof-of-concept that worked but never went anywhere, a diagram I drew while thinking through an architecture. These things end up scattered across apps, browser tabs, and half-finished gists, and I find them again mostly by luck.
+
+Sandbox is an attempt to build the thing I've wanted to use. The premise is spatial: instead of a list, content lives on a canvas. You can pan around it, group things by proximity, and get a sense of how ideas relate to each other in a way that a linear list doesn't give you. The influence is FigJam — I spend enough time there that the spatial model feels natural — but the content is code and technical notes rather than design artifacts.
+
+## What it's for
+
+The primary use case is code snippets with context. A snippet by itself is often not enough to be useful later. The interesting part is usually why it exists, what problem it was solving, and what didn't work before landing on it. Sandbox lets me attach that context directly, so when I come back to something six months later I have the full picture.
+
+The secondary use case is POC tracking. When I'm evaluating a library or approach for a real project, I usually build a small proof of concept. Currently those live in throwaway repos that I forget about. Having them in one place, on a canvas where I can see which ones connected to which projects, is the version I want.
+
+## Decisions I'm making
+
+The hardest design decision so far is scope. A canvas-based tool has a natural tendency to expand — there's always another type of card, another way to connect things, another organizational feature. I'm trying to stay disciplined about what this is for. It's not a second brain app, it's not a wiki, it's not a project management tool. The constraint is: if you wouldn't put it on a whiteboard while thinking through a technical problem, it probably doesn't belong here.
+
+The data model is simple on purpose. Cards have content, a type, and a position. Connections between cards are optional and untyped — I haven't added relationship labels because I don't know yet whether I'll actually use them. I'd rather add that when I understand the need from using the thing than design it upfront.
+
+Supabase handles auth and persistence. Real-time sync across tabs was something I wanted from the start, and the Supabase realtime layer made that straightforward. The canvas state syncs without explicit save operations, which is the behavior I wanted — the closest analog to how a physical whiteboard works.
+
+## Current state
+
+The core canvas interaction is working: pan, zoom, create cards, move them around, resize. Basic code highlighting is in. The snippet card type is the most complete. POC cards exist but the format isn't settled — I'm still figuring out what metadata is actually useful there versus what I'm adding because it seems like it should be useful.
+
+I'm not sure yet when I'll open it up. It works for me, which is a start.

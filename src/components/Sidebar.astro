@@ -1,0 +1,520 @@
+---
+import { Image } from 'astro:assets'
+import type { ImageMetadata } from 'astro'
+import NavGroup from './NavGroup.astro'
+import { Briefcase, FileText, Mail, PanelLeftClose, PanelLeftOpen } from 'lucide-astro'
+
+interface NavItem {
+  label: string
+  href: string
+  count?: number
+}
+
+interface NavSection {
+  heading: string
+  items: NavItem[]
+}
+
+interface Props {
+  name: string
+  title: string
+  initials: string
+  avatarSrc?: ImageMetadata
+  ctaLabel?: string
+  ctaHref?: string
+  ctaComingSoon?: boolean
+  nav?: NavSection[]
+  availability?: string
+}
+
+const {
+  name,
+  title,
+  initials,
+  avatarSrc,
+  ctaLabel,
+  ctaHref,
+  ctaComingSoon,
+  nav = [],
+  availability,
+} = Astro.props
+
+const pathname = Astro.url.pathname
+---
+
+<aside class="sidebar" id="sidebar">
+
+  <!-- Always visible: avatar + toggle -->
+  <div class="sidebar__top">
+    <a class="sidebar__avatar-link" href="/" aria-label="Home">
+      {avatarSrc ? (
+        <Image class="sidebar__avatar sidebar__avatar--photo" src={avatarSrc} alt={name} width={48} height={48} />
+      ) : (
+        <div class="sidebar__avatar" aria-hidden="true">{initials}</div>
+      )}
+    </a>
+
+    <button class="sidebar__toggle" id="sidebar-toggle" aria-label="Collapse sidebar" aria-expanded="true">
+      <span class="icon-collapse"><PanelLeftClose size={16} /></span>
+      <span class="icon-expand"><PanelLeftOpen size={16} /></span>
+    </button>
+  </div>
+
+  <!-- Expanded content: hidden during collapse + expand animation -->
+  <div class="sidebar__body">
+    <div class="sidebar__identity">
+      <p class="sidebar__name">{name}</p>
+      <p class="sidebar__title">{title}</p>
+    </div>
+
+    {ctaLabel && ctaHref && (
+      <div class="sidebar__cta-section">
+        {ctaComingSoon ? (
+          <div class="sidebar__cta-wrap">
+            <span class="sidebar__cta sidebar__cta--disabled" aria-disabled="true">
+              {ctaLabel}
+            </span>
+            <span class="sidebar__cta-tooltip">Coming soon</span>
+          </div>
+        ) : (
+          <a class="sidebar__cta" href={ctaHref}>
+            {ctaLabel}
+          </a>
+        )}
+      </div>
+    )}
+
+    <div class="sidebar__nav">
+      {nav.map((section) => (
+        <NavGroup heading={section.heading} items={section.items} />
+      ))}
+    </div>
+
+    {availability && (
+      <div class="sidebar__availability">
+        <p class="sidebar__availability-label">Availability</p>
+        <p class="sidebar__availability-text">{availability}</p>
+      </div>
+    )}
+  </div>
+
+  <!-- Collapsed-only: icon nav -->
+  <nav class="sidebar__icon-nav" aria-label="Navigation">
+    {nav.map((section) => {
+      const firstItem = section.items[0]
+      if (!firstItem) return null
+      const isActive = section.items.some((item) => pathname === item.href || pathname.startsWith(item.href + '/'))
+      return (
+        <a
+          class="sidebar__icon-link"
+          href={firstItem.href}
+          aria-label={section.heading}
+          data-tooltip={section.heading}
+          aria-current={isActive ? 'page' : undefined}
+        >
+          {section.heading === 'Projects' && <Briefcase size={18} />}
+          {section.heading === 'Writing' && <FileText size={18} />}
+        </a>
+      )
+    })}
+    {ctaHref && (
+      <a
+        class="sidebar__icon-link"
+        href={ctaHref}
+        aria-label={ctaLabel}
+        data-tooltip={ctaLabel}
+        aria-current={pathname === ctaHref ? 'page' : undefined}
+      >
+        <Mail size={18} />
+      </a>
+    )}
+  </nav>
+
+</aside>
+
+<style>
+  .sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    inline-size: var(--sidebar-width);
+    background: var(--sidebar-bg);
+    border-inline-end: var(--border-thin) solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+    padding: var(--s1);
+    overflow-y: auto;
+    overflow-x: hidden;
+    z-index: 20;
+    transition: inline-size 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                padding-inline 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ─── Top row: avatar + toggle ─── */
+  .sidebar__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .sidebar__avatar {
+    flex-shrink: 0;
+    min-inline-size: 2.5rem;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border-radius: var(--border-radius);
+    background: var(--color-text);
+    color: var(--color-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .sidebar__avatar--photo {
+    object-fit: cover;
+    object-position: center top;
+  }
+
+  .sidebar__avatar-link {
+    display: contents;
+  }
+
+  .sidebar__avatar-link:hover .sidebar__avatar {
+    opacity: 0.85;
+    transition: opacity 0.15s;
+  }
+
+  /* ─── Toggle button ─── */
+  .sidebar__toggle {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    background: var(--color-surface);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: color 0.1s, background 0.1s, border-color 0.1s;
+    padding: 0;
+  }
+
+  .sidebar__toggle:hover {
+    color: var(--color-text);
+    background: var(--color-border);
+    border-color: var(--color-border-strong);
+  }
+
+  .icon-collapse { display: flex; }
+  .icon-expand   { display: none; }
+
+  /* ─── Expanded body ─── */
+  /*
+   * Target-state transition trick:
+   *   - When EXPANDING (this is the target state): delay 0.35s so content waits
+   *     for the sidebar to reach full width, then fades in over 0.2s.
+   *   - When COLLAPSING (collapsed state is the target): that rule sets
+   *     transition: opacity 0s, so content disappears instantly — no reflow visible.
+   */
+  .sidebar__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+    flex: 1;
+    min-block-size: 0;
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.15s ease 0.2s;
+  }
+
+  /* Collapsed: instant hide + remove from layout flow */
+  :global(html.sidebar-collapsed) .sidebar__body {
+    position: absolute;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0s;
+  }
+
+  /* ─── Identity ─── */
+  .sidebar__name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .sidebar__title {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    line-height: 1.3;
+    margin-block-start: 0.2rem;
+  }
+
+  /* ─── CTA ─── */
+  .sidebar__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding-block: 0.5rem;
+    padding-inline: var(--s1);
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+
+  .sidebar__cta:hover { opacity: 0.85; }
+
+  .sidebar__cta-wrap {
+    position: relative;
+    cursor: not-allowed;
+  }
+
+  .sidebar__cta--disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .sidebar__cta-wrap:hover .sidebar__cta-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .sidebar__cta-tooltip {
+    position: absolute;
+    inset-block-start: calc(100% + 0.4rem);
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    background: var(--color-chrome);
+    color: var(--color-chrome-text);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    padding-block: 0.25rem;
+    padding-inline: 0.5rem;
+    border-radius: var(--border-radius-sm);
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.15s, transform 0.15s;
+    pointer-events: none;
+  }
+
+  /* ─── Nav ─── */
+  .sidebar__nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+  }
+
+  /* ─── Availability ─── */
+  .sidebar__availability {
+    margin-block-start: auto;
+  }
+
+  .sidebar__availability-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-block-end: 0.25rem;
+  }
+
+  .sidebar__availability-text {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+  }
+
+  /* ─── Collapsed-only: icon nav ─── */
+  .sidebar__icon-nav {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .sidebar__icon-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border-radius: var(--border-radius-sm);
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.1s, background 0.1s;
+  }
+
+  .sidebar__icon-link:hover {
+    color: var(--color-text);
+    background: var(--color-border);
+  }
+
+  .sidebar__icon-link[aria-current='page'] {
+    color: var(--color-brand);
+  }
+
+  .sidebar__icon-link::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    inset-inline-start: calc(100% + 0.6rem);
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    background: var(--color-chrome);
+    color: var(--color-chrome-text);
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    padding-block: 0.25rem;
+    padding-inline: 0.5rem;
+    border-radius: var(--border-radius-sm);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+    z-index: 30;
+  }
+
+  .sidebar__icon-link:hover::after {
+    opacity: 1;
+  }
+
+  /* ─── Collapsed state overrides ─── */
+  :global(html.sidebar-collapsed) .sidebar {
+    padding-inline: 0.5rem;
+  }
+
+  :global(html.sidebar-collapsed) .sidebar__top {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: flex-start;
+  }
+
+  :global(html.sidebar-collapsed) .icon-collapse { display: none; }
+  :global(html.sidebar-collapsed) .icon-expand   { display: flex; }
+
+  :global(html.sidebar-collapsed) .sidebar__icon-nav {
+    display: flex;
+  }
+
+  /* ─── Mobile: drawer overlay ─── */
+  @media (max-width: 48em) {
+    .sidebar {
+      inline-size: min(20rem, 85dvw);
+      transform: translateX(-100%);
+      /* Replace inline-size/padding transitions with transform */
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    :global(html.sidebar-mobile-open) .sidebar {
+      transform: translateX(0);
+    }
+
+    /* Force full expanded content regardless of desktop collapsed state */
+    :global(html.sidebar-collapsed) .sidebar {
+      inline-size: min(20rem, 85dvw);
+      padding-inline: var(--s1);
+      transform: translateX(-100%);
+    }
+
+    :global(html.sidebar-collapsed.sidebar-mobile-open) .sidebar {
+      transform: translateX(0);
+    }
+
+    :global(html.sidebar-collapsed) .sidebar__body {
+      position: static;
+      visibility: visible;
+      opacity: 1;
+      pointer-events: auto;
+      transition: none;
+    }
+
+    :global(html.sidebar-collapsed) .sidebar__top {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0;
+    }
+
+    :global(html.sidebar-collapsed) .sidebar__icon-nav {
+      display: none;
+    }
+
+    :global(html.sidebar-collapsed) .icon-collapse { display: flex; }
+    :global(html.sidebar-collapsed) .icon-expand   { display: none; }
+  }
+</style>
+
+<script>
+  function initSidebar() {
+    const html = document.documentElement
+    const toggle = document.getElementById('sidebar-toggle')
+    const scrim = document.getElementById('sidebar-scrim')
+    if (!toggle) return
+
+    const collapsed = localStorage.getItem('sidebar-collapsed') === 'true'
+    html.classList.toggle('sidebar-collapsed', collapsed)
+
+    toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true')
+    toggle.setAttribute('aria-label', collapsed ? 'Expand sidebar' : 'Collapse sidebar')
+
+    toggle.addEventListener('click', () => {
+      const isMobile = window.matchMedia('(max-width: 48em)').matches
+      if (isMobile) {
+        html.classList.remove('sidebar-mobile-open')
+        const navToggle = document.getElementById('nav-toggle')
+        navToggle?.setAttribute('aria-expanded', 'false')
+        navToggle?.focus()
+        return
+      }
+      const isNowCollapsed = html.classList.toggle('sidebar-collapsed')
+      localStorage.setItem('sidebar-collapsed', String(isNowCollapsed))
+      toggle.setAttribute('aria-expanded', isNowCollapsed ? 'false' : 'true')
+      toggle.setAttribute('aria-label', isNowCollapsed ? 'Expand sidebar' : 'Collapse sidebar')
+    })
+
+    scrim?.addEventListener('click', () => {
+      html.classList.remove('sidebar-mobile-open')
+      const navToggle = document.getElementById('nav-toggle')
+      navToggle?.setAttribute('aria-expanded', 'false')
+      navToggle?.focus()
+    })
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && html.classList.contains('sidebar-mobile-open')) {
+        html.classList.remove('sidebar-mobile-open')
+        const navToggle = document.getElementById('nav-toggle')
+        navToggle?.setAttribute('aria-expanded', 'false')
+        navToggle?.focus()
+      }
+    })
+  }
+
+  // Preserve sidebar-collapsed across ClientRouter page swaps.
+  // Astro replaces documentElement attributes from the incoming page's <html>,
+  // which has no sidebar-collapsed class, causing --sidebar-width to flash to
+  // its @property initial-value (13rem) and back — displacing the view-transition morph.
+  document.addEventListener('astro:before-swap', (e) => {
+    if (document.documentElement.classList.contains('sidebar-collapsed')) {
+      e.newDocument.documentElement.classList.add('sidebar-collapsed')
+    }
+  })
+
+  document.addEventListener('astro:page-load', initSidebar)
+</script>

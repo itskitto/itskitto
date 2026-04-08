@@ -1,0 +1,159 @@
+---
+interface Props {
+  messages: string[]
+  interval?: number
+}
+
+const { messages = [], interval = 4000 } = Astro.props
+---
+
+{messages.length > 0 && (
+  <div
+    class="ticker"
+    data-ticker
+    data-messages={JSON.stringify(messages)}
+    data-interval={String(interval)}
+  >
+    <span class="ticker__dot" aria-hidden="true"></span>
+
+    <output
+      class="ticker__message"
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      {messages[0]}
+    </output>
+
+    <span class="ticker__cursor" aria-hidden="true">▋</span>
+
+    <div class="ticker__right">
+      <slot name="right" />
+    </div>
+  </div>
+)}
+
+<script>
+  const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%*[]<>/\\|'
+  const FRAME_MS = 30
+  const FRAMES = 18 // ~540ms total scramble
+
+  function scrambleTo(output: HTMLElement, text: string, onDone?: () => void) {
+    let frame = 0
+    const timer = setInterval(() => {
+      const progress = frame / FRAMES
+      const resolved = Math.floor(progress * text.length)
+      output.textContent = text
+        .split('')
+        .map((char, i) => {
+          if (char === ' ') return ' '
+          if (i < resolved) return char
+          return CHARS[Math.floor(Math.random() * CHARS.length)]
+        })
+        .join('')
+      frame++
+      if (frame > FRAMES) {
+        clearInterval(timer)
+        output.textContent = text
+        onDone?.()
+      }
+    }, FRAME_MS)
+    return timer
+  }
+
+  function initTicker(el: HTMLElement) {
+    const messages: string[] = JSON.parse(el.dataset.messages ?? '[]')
+    const interval = parseInt(el.dataset.interval ?? '4000', 10)
+    const output = el.querySelector<HTMLElement>('.ticker__message')
+
+    if (!output || messages.length <= 1) return
+
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+    let current = 0
+    let paused = false
+    let scrambleTimer: ReturnType<typeof setInterval> | null = null
+
+    function advance() {
+      if (paused) return
+      current = (current + 1) % messages.length
+
+      if (reduced) {
+        output!.textContent = messages[current]
+        return
+      }
+
+      if (scrambleTimer) clearInterval(scrambleTimer)
+      scrambleTimer = scrambleTo(output!, messages[current])
+    }
+
+    const rotateTimer = setInterval(advance, interval)
+
+    el.addEventListener('mouseenter', () => { paused = true })
+    el.addEventListener('mouseleave', () => { paused = false })
+
+    document.addEventListener('astro:before-preparation', () => {
+      clearInterval(rotateTimer)
+      if (scrambleTimer) clearInterval(scrambleTimer)
+    }, { once: true })
+  }
+
+  function init() {
+    document.querySelectorAll<HTMLElement>('[data-ticker]').forEach(initTicker)
+  }
+
+  document.addEventListener('astro:page-load', init)
+</script>
+
+<style>
+  .ticker {
+    display: contents;
+  }
+
+  .ticker__dot {
+    position: relative;
+    display: inline-block;
+    inline-size: 0.4rem;
+    block-size: 0.4rem;
+    border-radius: var(--border-radius-full);
+    background: var(--color-available);
+    flex-shrink: 0;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ticker__dot::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: var(--color-available);
+      animation: dot-ping 2.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    }
+  }
+
+  .ticker__message {
+    display: inline-block;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ticker__cursor {
+    display: inline-block;
+    color: var(--color-brand);
+    animation: blink 1s step-end infinite;
+    margin-inline-start: 0.05em;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+  }
+
+  .ticker__right {
+    margin-inline-start: auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker__cursor {
+      animation: none;
+    }
+  }
+</style>

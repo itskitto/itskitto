@@ -1,0 +1,136 @@
+---
+import type { CollectionEntry } from 'astro:content'
+
+interface Props {
+  post: CollectionEntry<'posts'>
+}
+
+const { post } = Astro.props
+---
+
+<article class="post-card">
+  <header class="post-card__meta meta-row">
+    <div class="post-card__meta-left">
+      {post.data.ref && <span class="post-card__ref">REF: {post.data.ref}</span>}
+      <time class="post-card__date" datetime={post.data.pubDate.toISOString()}>
+        {post.data.pubDate.toLocaleDateString('en-US', { month: 'long', day: '2-digit', year: 'numeric' }).toUpperCase()}
+      </time>
+    </div>
+    {post.data.readTime && (
+      <span class="post-card__read-time" aria-label={`${post.data.readTime} minute read`}>
+        {post.data.readTime} MIN READ
+      </span>
+    )}
+  </header>
+
+  <h2 class="post-card__title" transition:name={`post-title-${post.id}`}>
+    <a href={`/posts/${post.id}`}>{post.data.title}</a>
+  </h2>
+
+  <p class="post-card__description">{post.data.description}</p>
+
+  <hr class="post-card__divider" />
+
+  <footer class="post-card__actions">
+    {post.data.draft ? (
+      <span class="post-card__coming-soon">Coming Soon</span>
+    ) : (
+      <a class="btn btn--brand btn--sm" href={`/posts/${post.id}`}>Read Entry</a>
+    )}
+  </footer>
+</article>
+
+<style>
+  .post-card {
+    background: var(--color-surface);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: var(--s1);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .post-card {
+      transition: background 0.15s, box-shadow 0.15s;
+    }
+
+    .post-card:hover {
+      background: var(--color-surface);
+      box-shadow: inset 3px 0 0 var(--color-brand);
+    }
+  }
+
+  .post-card__meta {
+    /* base styles via .meta-row */
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .post-card__meta-left {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+  }
+
+  .post-card__ref {
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+
+  .post-card__read-time {
+    flex-shrink: 0;
+    background: var(--color-brand-muted);
+    color: var(--color-brand);
+    padding-block: 0.2rem;
+    padding-inline: 0.5rem;
+    border-radius: var(--border-radius-sm);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .post-card__title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  .post-card__title a {
+    text-decoration: none;
+    transition: color 0.1s;
+  }
+
+  .post-card__title a:hover { color: var(--color-brand); }
+
+  .post-card__description {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    max-inline-size: 60ch;
+  }
+
+  .post-card__divider {
+    border: none;
+    border-block-start: var(--border-thin) solid var(--color-border);
+  }
+
+  .post-card__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+  }
+
+  .post-card__coming-soon {
+    display: inline-flex;
+    align-items: center;
+    padding-block: 0.4rem;
+    padding-inline: 0.875rem;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+  }
+</style>

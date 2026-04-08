@@ -1,0 +1,565 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro'
+import Breadcrumb from '../components/Breadcrumb.astro'
+import { SIDEBAR, STATUS_MESSAGES } from '../config'
+import { getNav } from '../lib/nav'
+
+const nav = await getNav()
+
+const contactMethods = [
+  { label: 'Email', value: 'hello@itskitto.dev', href: 'mailto:hello@itskitto.dev' },
+  { label: 'GitHub', value: 'github.com/itskitto', href: 'https://github.com/itskitto' },
+  { label: 'LinkedIn', value: 'nicholaskhrangtong', href: 'https://linkedin.com/in/nicholaskhrangtong' },
+  { label: 'Twitter / X', value: '@itskitto', href: 'https://x.com/itskitto' },
+]
+---
+
+<script
+  is:inline
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer
+></script>
+
+<script is:inline>
+  function onTurnstileVerified() {
+    var footer = document.querySelector('.form-footer')
+    if (footer) footer.removeAttribute('hidden')
+  }
+  function onTurnstileExpired() {
+    var footer = document.querySelector('.form-footer')
+    if (footer) footer.setAttribute('hidden', '')
+  }
+</script>
+
+<BaseLayout
+  title="Get in touch — Nicholas Khrangtong"
+  description="Reach out about freelance projects, full-time roles, or just to say hello."
+  sidebar={{ ...SIDEBAR, nav }}
+  status={{ messages: STATUS_MESSAGES }}
+>
+  <Breadcrumb
+    crumbs={[
+      { label: 'Index', href: '/' },
+      { label: 'Contact' },
+    ]}
+  />
+
+  <div class="contact-layout">
+    <header class="contact-header">
+      <div class="contact-meta">
+        <span class="contact-available">● AVAILABLE</span>
+        <span>APRIL 2026</span>
+      </div>
+      <h1 class="contact-title">Get in touch.</h1>
+      <p class="contact-lead">
+        I'm open to freelance projects and full-time positions. Whether you have something specific
+        in mind or just want to connect, drop me a line and I'll get back to you within a day or two.
+      </p>
+    </header>
+
+    <div class="contact-body">
+      <section class="contact-methods" aria-label="Contact methods">
+        <p class="section-label">Ways to reach me</p>
+        <ul class="method-list">
+          {contactMethods.map((m) => (
+            <li class="method-item">
+              <span class="method-label">{m.label}</span>
+              <a class="method-link" href={m.href} target={m.href.startsWith('mailto') ? undefined : '_blank'} rel="noopener">
+                {m.value}
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <div class="contact-note">
+          <p class="section-label">Response time</p>
+          <p class="note-text">Usually within 24–48 hours. For urgent inquiries, email is fastest.</p>
+        </div>
+      </section>
+
+      <section class="contact-form-section" aria-label="Send a message">
+        <p class="section-label">Send a message</p>
+
+        <div class="form-success" hidden aria-live="polite">
+          <p class="form-success__status">● MESSAGE_RECEIVED</p>
+          <p class="form-success__text">Thanks for reaching out. I'll get back to you within a day or two.</p>
+        </div>
+
+        <form class="contact-form" action="/api/contact" method="post" novalidate>
+          <div class="form-row">
+            <div class="form-field">
+              <label class="form-label" for="name">Name</label>
+              <input class="form-input" type="text" id="name" name="name" placeholder="Your name" autocomplete="name" />
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="email">Email</label>
+              <input class="form-input" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="subject">Subject</label>
+            <div class="form-select-wrap">
+              <select class="form-select" id="subject" name="subject">
+                <option value="">Select a topic</option>
+                <option value="freelance">Freelance project</option>
+                <option value="fulltime">Full-time role</option>
+                <option value="consulting">Consulting</option>
+                <option value="other">Something else</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label class="form-label" for="message">Message</label>
+            <textarea class="form-textarea" id="message" name="message" rows="6" placeholder="Tell me about your project or what you're working on..."></textarea>
+          </div>
+
+          <div
+            class="cf-turnstile"
+            data-sitekey={import.meta.env.PUBLIC_TURNSTILE_SITE_KEY}
+            data-theme="auto"
+            data-callback="onTurnstileVerified"
+            data-expired-callback="onTurnstileExpired"
+            data-error-callback="onTurnstileExpired"
+          ></div>
+
+          <div class="form-footer" hidden>
+            <button class="btn btn--primary form-submit" type="submit">
+              Send message
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M2 7H12M7 2L12 7L7 12" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <p class="form-disclaimer">No spam. Your info stays between us.</p>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .contact-layout {
+    max-inline-size: 54rem;
+    padding-block-start: var(--s1);
+  }
+
+  /* Header */
+  .contact-header {
+    margin-block-end: var(--s3);
+  }
+
+  .contact-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin-block-end: var(--s1);
+  }
+
+  .contact-available {
+    color: var(--color-available);
+    font-weight: 600;
+  }
+
+  .contact-title {
+    font-size: clamp(2rem, 4vw + 1rem, 3.5rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-block-end: var(--s1);
+  }
+
+  .contact-lead {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--color-text-secondary);
+    max-inline-size: 52ch;
+  }
+
+  /* Body grid */
+  .contact-body {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: var(--s3);
+    align-items: start;
+  }
+
+  /* Section label */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-block-end: var(--s1);
+  }
+
+  /* Contact methods */
+  .method-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-block-end: var(--s2);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+  }
+
+  .method-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s1);
+    padding-block: 0.75rem;
+    padding-inline: var(--s1);
+    border-block-end: var(--border-thin) solid var(--color-border);
+    background: var(--color-bg);
+    transition: background 0.1s;
+  }
+
+  .method-item:last-child {
+    border-block-end: none;
+  }
+
+  .method-item:hover {
+    background: var(--color-surface);
+  }
+
+  .method-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+  }
+
+  .method-link {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-brand);
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.1s;
+  }
+
+  .method-link:hover {
+    opacity: 0.75;
+  }
+
+  .contact-note {
+    padding: var(--s1);
+    background: var(--color-surface);
+    border-radius: var(--border-radius);
+    border: var(--border-thin) solid var(--color-border);
+  }
+
+  .contact-note .section-label {
+    margin-block-end: 0.4rem;
+  }
+
+  .note-text {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--color-text-secondary);
+  }
+
+  /* Form */
+  .contact-form-section {
+    position: sticky;
+    inset-block-start: calc(var(--statusbar-height) + var(--s2));
+  }
+
+  .contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--s1);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--s1);
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+
+  .form-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .form-input,
+  .form-select,
+  .form-textarea {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    color: var(--color-text);
+    background: var(--color-bg);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--border-radius-sm);
+    padding-block: 0.6rem;
+    padding-inline: 0.75rem;
+    transition: border-color 0.1s, box-shadow 0.1s;
+    outline: none;
+    inline-size: 100%;
+  }
+
+  .form-input::placeholder,
+  .form-textarea::placeholder {
+    color: var(--color-text-muted);
+  }
+
+  .form-input:focus,
+  .form-select:focus,
+  .form-textarea:focus {
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px hsl(35 92% 52% / 0.15);
+  }
+
+  .form-select-wrap {
+    position: relative;
+  }
+
+  .form-select-wrap::after {
+    content: '';
+    position: absolute;
+    inset-inline-end: 0.75rem;
+    inset-block-start: 50%;
+    translate: 0 -50%;
+    inline-size: 0;
+    block-size: 0;
+    border-inline: 4px solid transparent;
+    border-block-start: 5px solid var(--color-text-muted);
+    pointer-events: none;
+  }
+
+  .form-select {
+    appearance: none;
+    padding-inline-end: 2rem;
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-block-size: 8rem;
+    line-height: 1.6;
+  }
+
+  .form-footer {
+    display: flex;
+    align-items: center;
+    gap: var(--s1);
+    padding-block-start: 0.5rem;
+  }
+
+  /* form-submit inherits from global .btn .btn--primary — just extend here */
+  .form-submit {
+    gap: 0.5rem;
+    padding-block: 0.65rem;
+    flex-shrink: 0;
+  }
+
+  /* Validation states */
+  .form-field--error .form-input,
+  .form-field--error .form-select,
+  .form-field--error .form-textarea {
+    border-color: var(--color-error);
+  }
+
+  /* Success state */
+  .form-success {
+    padding: var(--s2);
+    background: var(--color-surface);
+    border: var(--border-thin) solid var(--color-border);
+    border-radius: var(--border-radius);
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.35s var(--ease-out-quart), transform 0.35s var(--ease-out-quart);
+  }
+
+  .form-success.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Dynamically created via JS — :global so Astro scoping doesn't interfere */
+  :global(.form-field-error) {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    color: var(--color-error);
+    letter-spacing: 0.04em;
+    margin-block-start: 0.2rem;
+  }
+
+  .form-success__status {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--color-available);
+    margin-block-end: 0.5rem;
+  }
+
+  .form-success__text {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  .form-disclaimer {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+  }
+
+  @media (max-width: 48em) {
+    .contact-body {
+      grid-template-columns: 1fr;
+    }
+
+    .contact-form-section {
+      position: static;
+    }
+
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  function initContactForm() {
+    const form = document.querySelector<HTMLFormElement>('.contact-form')
+    if (!form) return
+
+    const required = ['name', 'email', 'message'] as const
+    const submitBtn = form.querySelector<HTMLButtonElement>('.form-submit')
+
+    function validateField(name: string): boolean {
+      const field = form!.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`)
+      if (!field) return true
+      const wrapper = field.closest('.form-field')
+      wrapper?.querySelector('.form-field-error')?.remove()
+
+      let error = ''
+      if (!field.value.trim()) {
+        error = 'This field is required.'
+      } else if (name === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(field.value)) {
+        error = 'Please enter a valid email address.'
+      }
+
+      wrapper?.classList.toggle('form-field--error', !!error)
+      if (error && wrapper) {
+        const el = document.createElement('p')
+        el.className = 'form-field-error'
+        el.textContent = error
+        wrapper.appendChild(el)
+      }
+      return !error
+    }
+
+    function shakeErrors() {
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+      form!.querySelectorAll<HTMLElement>('.form-field--error').forEach((wrapper) => {
+        wrapper.animate(
+          [
+            { transform: 'translateX(0)' },
+            { transform: 'translateX(-5px)' },
+            { transform: 'translateX(5px)' },
+            { transform: 'translateX(-3px)' },
+            { transform: 'translateX(0)' },
+          ],
+          { duration: 320, easing: 'ease-out' }
+        )
+      })
+    }
+
+    function showError(message: string) {
+      // Show a general form-level error below the submit button
+      const existing = form!.querySelector('.form-general-error')
+      existing?.remove()
+      const el = document.createElement('p')
+      el.className = 'form-field-error form-general-error'
+      el.textContent = message
+      submitBtn?.insertAdjacentElement('afterend', el)
+    }
+
+    function showSuccess() {
+      const section = form!.closest('.contact-form-section')
+      const success = section?.querySelector<HTMLElement>('.form-success')
+      if (success) {
+        success.removeAttribute('hidden')
+        requestAnimationFrame(() => requestAnimationFrame(() => success.classList.add('is-visible')))
+      }
+      form!.setAttribute('hidden', '')
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+
+      const valid = required.map(validateField).every(Boolean)
+      if (!valid) { shakeErrors(); return }
+
+      // Require Turnstile token before submitting
+      const token = (form!.querySelector<HTMLInputElement>('[name="cf-turnstile-response"]'))?.value
+      if (!token) {
+        showError('Please complete the human verification above.')
+        return
+      }
+
+      // Disable submit while in-flight
+      if (submitBtn) {
+        submitBtn.disabled = true
+        submitBtn.textContent = 'Sending…'
+      }
+
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          body: new FormData(form!),
+        })
+        const data = await res.json() as { ok?: boolean; error?: string }
+
+        if (!res.ok || !data.ok) {
+          showError(data.error ?? 'Something went wrong. Please try again.')
+          if (submitBtn) {
+            submitBtn.disabled = false
+            submitBtn.textContent = 'Send message'
+          }
+          return
+        }
+
+        showSuccess()
+      } catch {
+        showError('Network error. Please check your connection and try again.')
+        if (submitBtn) {
+          submitBtn.disabled = false
+          submitBtn.textContent = 'Send message'
+        }
+      }
+    })
+
+    required.forEach((name) => {
+      form!.querySelector(`[name="${name}"]`)?.addEventListener('input', () => validateField(name))
+    })
+  }
+
+  document.addEventListener('astro:page-load', initContactForm)
+</script>

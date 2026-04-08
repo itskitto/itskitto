@@ -1,0 +1,123 @@
+---
+import StatusTicker from './StatusTicker.astro'
+import { PanelLeftOpen } from 'lucide-astro'
+
+interface Props {
+  messages?: string[]
+  interval?: number
+  right?: string
+}
+
+const { messages = [], interval, right } = Astro.props
+---
+
+<footer class="status-bar">
+  <button
+    class="nav-toggle"
+    id="nav-toggle"
+    style="display:none"
+    aria-label="Open navigation"
+    aria-expanded="false"
+    aria-controls="sidebar"
+  >
+    <PanelLeftOpen size={18} />
+  </button>
+
+  <span class="status-bar__left">
+    {messages.length > 0 ? (
+      <StatusTicker messages={messages} interval={interval}>
+        <slot name="right" slot="right" />
+      </StatusTicker>
+    ) : (
+      <slot name="left" />
+    )}
+  </span>
+
+  <span class="status-bar__right">
+    {right ?? <slot name="right" />}
+  </span>
+</footer>
+
+<style>
+  .status-bar {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline-start: var(--sidebar-width);
+    inset-inline-end: 0;
+    block-size: var(--statusbar-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: var(--s1);
+    background: var(--color-bg);
+    border-block-end: var(--border-thin) solid var(--color-border);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+    z-index: 10;
+    transition: inset-inline-start 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .status-bar__left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .nav-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2rem;
+    block-size: 2rem;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: color 0.1s;
+  }
+
+  .nav-toggle:hover {
+    color: var(--color-text);
+  }
+
+  @media (max-width: 48em) {
+    .status-bar {
+      transition: none;
+    }
+
+    .nav-toggle {
+      display: flex;
+      inline-size: 2.75rem;
+      block-size: 2.75rem;
+      margin-inline-start: -0.5rem; /* compensate for status-bar padding so icon aligns to edge */
+    }
+  }
+</style>
+
+<script>
+  function initNavToggle() {
+    const navToggle = document.getElementById('nav-toggle')
+    if (!navToggle) return
+
+    // Remove inline style on mobile so the CSS media query can show it.
+    // Inline styles override scoped CSS selectors, so this is the reliable guard.
+    if (window.matchMedia('(max-width: 48em)').matches) {
+      navToggle.style.removeProperty('display')
+    }
+
+    navToggle.addEventListener('click', () => {
+      const isOpen = document.documentElement.classList.toggle('sidebar-mobile-open')
+      navToggle.setAttribute('aria-expanded', String(isOpen))
+      if (isOpen) {
+        const sidebar = document.getElementById('sidebar')
+        sidebar?.querySelector<HTMLElement>('a, button')?.focus()
+      }
+    })
+  }
+
+  document.addEventListener('astro:page-load', initNavToggle)
+</script>

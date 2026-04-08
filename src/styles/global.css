@@ -1,0 +1,280 @@
+@import './reset.css';
+@import './tokens.css';
+
+html.sidebar-collapsed {
+  --sidebar-width: 3.5rem;
+}
+
+/* ── Mobile: scrim overlay behind sidebar drawer ── */
+.sidebar-scrim {
+  position: fixed;
+  inset: 0;
+  background: hsl(215 18% 10% / 0.5);
+  z-index: 15;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+html.sidebar-mobile-open .sidebar-scrim {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Mobile: zero out sidebar-width so all consumers fix automatically ── */
+/* Also override html.sidebar-collapsed (specificity 0,1,1) which would otherwise
+   beat :root (0,1,0) — same specificity here wins by later source order. */
+@media (max-width: 48em) {
+  :root,
+  html.sidebar-collapsed {
+    --sidebar-width: 0rem;
+  }
+
+  /* Prevent any element from causing page-level horizontal scroll on mobile.
+     overflow-x on the root element propagates to the viewport. */
+  html {
+    overflow-x: hidden;
+  }
+
+  html.sidebar-mobile-open {
+    overflow: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--s0);
+  letter-spacing: 0.02em;
+}
+
+a { color: inherit; }
+
+/* ── Button system ──────────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  /* default size */
+  padding-block: 0.5rem;
+  padding-inline: var(--s1);
+  border-radius: var(--border-radius-sm);
+}
+
+.btn:hover { opacity: 0.8; }
+.btn:active { opacity: 0.9; transform: scale(0.97); }
+
+/* Variants */
+.btn--primary {
+  background: var(--color-text);
+  color: var(--color-bg);
+}
+
+.btn--secondary {
+  background: transparent;
+  color: var(--color-text);
+  border: var(--border-thin) solid var(--color-border-strong);
+}
+
+.btn--brand {
+  background: var(--color-brand);
+  color: var(--color-chrome);
+}
+
+/* Sizes */
+.btn--sm {
+  font-size: 0.8rem;
+  padding-block: 0.4rem;
+  padding-inline: 0.875rem;
+}
+
+.btn--lg {
+  font-size: 0.9rem;
+  padding-block: 0.625rem;
+  padding-inline: var(--s1);
+  border-radius: var(--border-radius);
+}
+
+/* ── Reading progress bar ── */
+.progress-bar {
+  position: fixed;
+  inset-block-start: var(--statusbar-height);
+  inset-inline-start: var(--sidebar-width);
+  inset-inline-end: 0;
+  block-size: 2px;
+  background: var(--color-brand);
+  transform-origin: left;
+  transform: scaleX(0);
+  z-index: 9;
+}
+
+@media (max-width: 48em) {
+  .progress-bar {
+    inset-inline-start: 0;
+  }
+}
+
+/* ── Section label — uppercase mono heading used throughout the UI ── */
+.section-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+/* ── Meta row — mono label/value strip used in cards and post headers ── */
+.meta-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: var(--tracking-wide);
+  color: var(--color-text-muted);
+}
+
+/* ── Table of contents ── */
+.toc__heading {
+  /* uses .section-label for base styles */
+  margin-block-end: 0.5rem;
+}
+
+.toc__list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.toc__link {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  text-decoration: none;
+  line-height: 1.4;
+  display: block;
+  transition: color 0.1s;
+}
+
+.toc__link:hover { color: var(--color-text); }
+
+.toc__link[aria-current] {
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--color-border);
+  padding-block: 0.1em;
+  padding-inline: 0.35em;
+  border-radius: var(--border-radius-sm);
+}
+
+pre,
+pre.astro-code {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  padding: var(--s1);
+  border-radius: var(--border-radius);
+  max-inline-size: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-block-end: var(--s1);
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* ── Expressive Code blocks ── */
+.expressive-code {
+  margin-block-end: var(--s1);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+  max-inline-size: 100%;
+  font-family: var(--font-mono);
+}
+
+/* Reset global pre rule inside EC — EC handles its own padding and radius */
+.expressive-code pre {
+  padding: 0;
+  border-radius: 0;
+  margin-block-end: 0;
+  max-inline-size: none;
+  overflow-x: auto;
+}
+
+@media (max-width: 48em) {
+  .expressive-code {
+    /* Prevent the block from widening the page on mobile */
+    max-inline-size: calc(100vw - var(--s2) * 2);
+  }
+}
+
+/* ── Dot ping — shared by all live-status dot indicators ── */
+@keyframes dot-ping {
+  0% { transform: scale(1); opacity: 0.7; }
+  65%, 100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* ── Post ending ── */
+.post-ending {
+  margin-block-start: var(--s3);
+  padding-block-start: var(--s2);
+  border-block-start: var(--border-thin) solid var(--color-border);
+}
+
+.post-ending__text {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.post-ending__emoji {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1.25rem;
+  cursor: pointer;
+  line-height: 1;
+  transition: transform 0.15s ease;
+}
+
+.post-ending__emoji:hover {
+  transform: scale(1.3) rotate(-10deg);
+}
+
+.post-ending__hint {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+  margin-inline-start: 0.5rem;
+}
+
