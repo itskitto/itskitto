@@ -30,9 +30,13 @@ strategies across operations.
 ## Stack
 
 **Languages** — TypeScript · JavaScript · Ruby · Python
+
 **Frontend** — React · Astro · CSS custom properties
+
 **Backend** — Rails · FastAPI · Laravel
+
 **Data & infra** — PostgreSQL · AWS · Temporal
+
 **Also** — LLM integration · AI agent evaluation · Arduino
 
 ---
