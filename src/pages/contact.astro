@@ -378,6 +378,10 @@ const contactMethods = [
     padding-block-start: 0.5rem;
   }
 
+  .form-footer[hidden] {
+    display: none;
+  }
+
   /* form-submit inherits from global .btn .btn--primary — just extend here */
   .form-submit {
     gap: 0.5rem;
@@ -401,6 +405,10 @@ const contactMethods = [
     opacity: 0;
     transform: translateY(-6px);
     transition: opacity 0.35s var(--ease-out-quart), transform 0.35s var(--ease-out-quart);
+  }
+
+  .form-success[hidden] {
+    display: none;
   }
 
   .form-success.is-visible {
