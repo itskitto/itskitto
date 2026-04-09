@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumb from '../../components/Breadcrumb.astro'
 import ProjectCard from '../../components/ProjectCard.astro'
+import ContactCTA from '../../components/ContactCTA.astro'
 import { SIDEBAR, STATUS_MESSAGES } from '../../config'
 import { getNav } from '../../lib/nav'
 
@@ -37,6 +38,12 @@ const nav = await getNav()
     <div class="project-list">
       {projects.map((project) => <ProjectCard project={project} />)}
     </div>
+
+    <ContactCTA
+      headline="Got a project in mind?"
+      sub="I work with product teams and small businesses — from the interface to the systems behind it."
+      label="Get in touch →"
+    />
   </div>
 </BaseLayout>
 

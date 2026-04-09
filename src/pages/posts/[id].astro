@@ -3,6 +3,7 @@ import { getCollection, render } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumb from '../../components/Breadcrumb.astro'
 import PostEnding from '../../components/PostEnding.tsx'
+import ContactCTA from '../../components/ContactCTA.astro'
 import { SIDEBAR, STATUS_MESSAGES } from '../../config'
 import { getNav } from '../../lib/nav'
 
@@ -161,6 +162,10 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
       </div>
 
       <PostEnding client:visible />
+      <ContactCTA
+        headline="Have thoughts on this?"
+        sub="I'm always up for a conversation — reach out any time."
+      />
     </article>
   </div>
 
@@ -296,7 +301,14 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
     border-radius: 50%;
     cursor: pointer;
     box-shadow: 0 2px 8px hsl(0 0% 0% / 0.15);
-    transition: opacity 0.15s ease, transform 0.1s ease;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s var(--ease-out-quart), transform 0.15s var(--ease-out-quart);
+  }
+
+  .back-to-top.is-visible {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   .back-to-top:hover {
@@ -357,6 +369,21 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
   .post__body :global(pre.astro-code) {
     max-inline-size: 100%;
     overflow-x: auto;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .post__meta {
+      animation: fade-up 0.45s var(--ease-out-quart) both;
+    }
+
+    .post__title {
+      animation: fade-up 0.5s var(--ease-out-quart) 55ms both;
+    }
   }
 
   @media (max-width: 48em) {
@@ -438,13 +465,20 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
   }
 </style>
 
-<script lang="ts">
+<script>
   import { initReadingProgress } from '../../lib/reading-progress'
   import { initTocObserver } from '../../lib/toc-observer'
 
   function initPost(): void {
     initReadingProgress('reading-progress', '.post')
     initTocObserver('.post__body h2, .post__body h3')
+
+    const backToTop = document.querySelector<HTMLElement>('.back-to-top')
+    if (backToTop) {
+      const onScroll = () => backToTop.classList.toggle('is-visible', window.scrollY > 300)
+      window.addEventListener('scroll', onScroll, { passive: true })
+      onScroll()
+    }
   }
 
   document.addEventListener('astro:page-load', initPost)

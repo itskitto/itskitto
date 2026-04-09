@@ -535,6 +535,16 @@ const contactMethods = [
       submitBtn?.insertAdjacentElement('afterend', el)
     }
 
+    function flashStatusBar(message: string, duration = 3500): void {
+      const output = document.querySelector<HTMLElement>('[data-ticker] .ticker__message')
+      if (!output) return
+      const original = output.textContent ?? ''
+      output.textContent = message
+      setTimeout(() => {
+        if (output.textContent === message) output.textContent = original
+      }, duration)
+    }
+
     function showSuccess(): void {
       const section = form!.closest('.contact-form-section')
       const success = section?.querySelector<HTMLElement>('.form-success')
@@ -543,6 +553,7 @@ const contactMethods = [
         requestAnimationFrame(() => requestAnimationFrame(() => success.classList.add('is-visible')))
       }
       form!.setAttribute('hidden', '')
+      flashStatusBar('TRANSMISSION RECEIVED')
     }
 
     form.addEventListener('submit', async (e) => {

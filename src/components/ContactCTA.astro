@@ -1,0 +1,93 @@
+---
+interface Props {
+  headline: string;
+  sub?: string;
+  label?: string;
+  compact?: boolean;
+}
+
+const {
+  headline,
+  sub,
+  label = "Get in touch →",
+  compact = false,
+} = Astro.props;
+---
+
+{
+  compact ? (
+    <div class="contact-cta contact-cta--compact">
+      <p class="contact-cta__inline">
+        {headline}
+        <a class="contact-cta__link" href="/contact">
+          {label}
+        </a>
+      </p>
+    </div>
+  ) : (
+    <div class="contact-cta">
+      <p class="contact-cta__headline">{headline}</p>
+      {sub && <p class="contact-cta__sub">{sub}</p>}
+      <a class="btn btn--secondary" href="/contact">
+        {label}
+      </a>
+    </div>
+  )
+}
+
+<style>
+  .contact-cta {
+    margin-block-start: var(--s1);
+    padding-block-start: var(--s2);
+    border-block-start: var(--border-thin) solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--s1);
+  }
+
+  .contact-cta__headline {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--color-text);
+  }
+
+  .contact-cta__sub {
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    max-inline-size: 44ch;
+    margin-block-start: -0.25rem;
+  }
+
+  .contact-cta--compact {
+    margin-block-start: var(--s2);
+    padding-block-start: var(--s2);
+    flex-direction: row;
+    align-items: center;
+    gap: 0;
+  }
+
+  .contact-cta__inline {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .contact-cta__link {
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    letter-spacing: 0.06em;
+    color: var(--color-brand);
+    text-decoration: none;
+    transition: opacity 0.1s;
+  }
+
+  .contact-cta__link:hover {
+    opacity: 0.75;
+  }
+</style>

@@ -148,19 +148,15 @@ const pathname = Astro.url.pathname;
         );
       })
     }
-    {
-      ctaHref && (
-        <a
-          class="sidebar__icon-link"
-          href={ctaHref}
-          aria-label={ctaLabel}
-          data-tooltip={ctaLabel}
-          aria-current={pathname === ctaHref ? "page" : undefined}
-        >
-          <Mail size={18} />
-        </a>
-      )
-    }
+    <a
+      class="sidebar__icon-link"
+      href="/contact"
+      aria-label="Contact"
+      data-tooltip="Contact"
+      aria-current={pathname === "/contact" ? "page" : undefined}
+    >
+      <Mail size={18} />
+    </a>
   </nav>
 </aside>
 

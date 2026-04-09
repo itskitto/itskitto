@@ -3,6 +3,7 @@ import { getCollection } from 'astro:content'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import Breadcrumb from '../../components/Breadcrumb.astro'
 import PostCard from '../../components/PostCard.astro'
+import ContactCTA from '../../components/ContactCTA.astro'
 import { SIDEBAR, STATUS_MESSAGES } from '../../config'
 import { getNav } from '../../lib/nav'
 
@@ -29,6 +30,11 @@ const nav = await getNav()
 
   <div class="post-list">
     {posts.map((post) => <PostCard post={post} />)}
+    <ContactCTA
+      headline="Something on your mind?"
+      label="Get in touch →"
+      compact
+    />
   </div>
 </BaseLayout>
 
