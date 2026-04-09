@@ -1,15 +1,14 @@
 import type { APIRoute } from 'astro'
+import { env } from 'cloudflare:workers'
 import { Resend } from 'resend'
 
 export const prerender = false
 
 const SITEVERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 const TO_ADDRESS = 'hello@itskitto.dev'
-const FROM_ADDRESS = 'noreply@itskitto.dev'
+const FROM_ADDRESS = 'hello@itskitto.dev'
 
-export const POST: APIRoute = async ({ request, locals }) => {
-  const { env } = locals.runtime
-
+export const POST: APIRoute = async ({ request }) => {
   // ── Parse form data ──────────────────────────────────────────────────────
   let data: FormData
   try {
@@ -35,6 +34,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
   // ── Verify Turnstile token ────────────────────────────────────────────────
   if (!token) {
     return json({ error: 'Human verification required.' }, 400)
+  }
+
+  if (!env.TURNSTILE_SECRET_KEY || !env.RESEND_API_KEY) {
+    return json({ error: 'Server configuration is incomplete.' }, 500)
   }
 
   const verification = await fetch(SITEVERIFY_URL, {
