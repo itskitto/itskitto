@@ -1,29 +1,40 @@
 ---
-import type { CollectionEntry } from 'astro:content'
+import type { CollectionEntry } from "astro:content";
 
 interface Props {
-  project: CollectionEntry<'projects'>
+  project: CollectionEntry<"projects">;
 }
 
-const { project } = Astro.props
-const { title, description, status, type, stack, startDate } = project.data
+const { project } = Astro.props;
+const { title, description, status, type, stack, startDate, url } =
+  project.data;
+const hasProjectUrl = typeof url === "string" && url.trim().length > 0;
 
 const date = startDate
-  .toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-  .toUpperCase()
+  .toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  .toUpperCase();
 ---
 
 <article class="project-card">
   <header class="project-card__meta meta-row">
     <span class="project-card__type">TYPE: {type.toUpperCase()}</span>
-    <time class="project-card__date" datetime={startDate.toISOString()}>{date}</time>
+    <time class="project-card__date" datetime={startDate.toISOString()}
+      >{date}</time
+    >
     <span class={`project-card__status project-card__status--${status}`}>
-      {status === 'active' && <span class="project-card__dot" aria-hidden="true" />}
+      {
+        status === "active" && (
+          <span class="project-card__dot" aria-hidden="true" />
+        )
+      }
       {status.toUpperCase()}
     </span>
   </header>
 
-  <h2 class="project-card__title" transition:name={`project-title-${project.id}`}>
+  <h2
+    class="project-card__title"
+    transition:name={`project-title-${project.id}`}
+  >
     <a href={`/projects/${project.id}`}>{title}</a>
   </h2>
 
@@ -36,7 +47,18 @@ const date = startDate
   <hr class="project-card__divider" />
 
   <footer class="project-card__actions">
-    <a class="btn btn--brand btn--sm" href={`/projects/${project.id}`}>View Project</a>
+    <a class="btn btn--brand btn--sm" href={`/projects/${project.id}`}
+      >View Project</a
+    >
+    {
+      hasProjectUrl ? (
+        <a class="project-card__link" href={url} target="_blank" rel="noopener">
+          Project URL
+        </a>
+      ) : (
+        <span class="project-card__coming-soon">Project URL: Coming soon</span>
+      )
+    }
   </footer>
 </article>
 
@@ -53,7 +75,9 @@ const date = startDate
 
   @media (prefers-reduced-motion: no-preference) {
     .project-card {
-      transition: background 0.15s, box-shadow 0.15s;
+      transition:
+        background 0.15s,
+        box-shadow 0.15s;
     }
 
     .project-card:hover {
@@ -114,7 +138,7 @@ const date = startDate
 
   @media (prefers-reduced-motion: no-preference) {
     .project-card__dot::after {
-      content: '';
+      content: "";
       position: absolute;
       inset: 0;
       border-radius: var(--border-radius-full);
@@ -135,7 +159,9 @@ const date = startDate
     transition: color 0.1s;
   }
 
-  .project-card__title a:hover { color: var(--color-brand); }
+  .project-card__title a:hover {
+    color: var(--color-brand);
+  }
 
   .project-card__description {
     font-size: 0.9rem;
@@ -176,4 +202,24 @@ const date = startDate
     gap: var(--s1);
   }
 
+  .project-card__link,
+  .project-card__coming-soon {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .project-card__link {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+  }
+
+  .project-card__link:hover {
+    color: var(--color-brand);
+  }
+
+  .project-card__coming-soon {
+    color: var(--color-text-secondary);
+  }
 </style>

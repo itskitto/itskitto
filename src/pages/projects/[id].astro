@@ -1,39 +1,59 @@
 ---
-import { getCollection, render } from 'astro:content'
-import BaseLayout from '../../layouts/BaseLayout.astro'
-import Breadcrumb from '../../components/Breadcrumb.astro'
-import PostEnding from '../../components/PostEnding.tsx'
-import { SIDEBAR, STATUS_MESSAGES } from '../../config'
-import { getNav } from '../../lib/nav'
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Breadcrumb from "../../components/Breadcrumb.astro";
+import PostEnding from "../../components/PostEnding.tsx";
+import { SIDEBAR, STATUS_MESSAGES } from "../../config";
+import { getNav } from "../../lib/nav";
 
 export async function getStaticPaths() {
-  const projects = await getCollection('projects', ({ data }) =>
-    import.meta.env.PROD ? !data.draft : true
-  )
-  return projects.map((project) => ({ params: { id: project.id }, props: { project } }))
+  const projects = await getCollection("projects", ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true,
+  );
+  return projects.map((project) => ({
+    params: { id: project.id },
+    props: { project },
+  }));
 }
 
-const { project } = Astro.props
-const { Content, headings } = await render(project)
+const { project } = Astro.props;
+const { Content, headings } = await render(project);
 
-const nav = await getNav()
+const nav = await getNav();
 
-const toc = headings.filter((h) => h.depth <= 3)
+const toc = headings.filter((h) => h.depth <= 3);
 
-const { title, description, status, type, role, stack, startDate, endDate, url, github } = project.data
+const {
+  title,
+  description,
+  status,
+  type,
+  role,
+  stack,
+  startDate,
+  endDate,
+  url,
+  github,
+} = project.data;
+const projectUrl =
+  typeof url === "string" && url.trim().length > 0 ? url : null;
+const githubUrl =
+  typeof github === "string" && github.trim().length > 0 ? github : null;
 
 const fmtDate = (d: Date) =>
-  d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toUpperCase()
+  d
+    .toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    .toUpperCase();
 
 const timeline = endDate
   ? `${fmtDate(startDate)} to ${fmtDate(endDate)}`
-  : `${fmtDate(startDate)} to Present`
+  : `${fmtDate(startDate)} to Present`;
 
 const statusLabel: Record<string, string> = {
-  active: 'Active',
-  complete: 'Complete',
-  archived: 'Archived',
-}
+  active: "Active",
+  complete: "Complete",
+  archived: "Archived",
+};
 ---
 
 <BaseLayout
@@ -49,24 +69,25 @@ const statusLabel: Record<string, string> = {
 
   <Breadcrumb
     crumbs={[
-      { label: 'Index', href: '/' },
-      { label: 'Projects', href: '/projects' },
+      { label: "Index", href: "/" },
+      { label: "Projects", href: "/projects" },
       { label: title },
     ]}
   />
 
   <div class="project-layout">
-
     <!-- Left column: info panel + optional ToC -->
     <div class="project-col">
-
       <aside class="info-panel" aria-label="Project details">
         <dl class="info-list">
-
           <div class="info-row">
             <dt class="info-label section-label">Status</dt>
             <dd class={`info-value info-status info-status--${status}`}>
-              {status === 'active' && <span class="info-dot" aria-hidden="true" />}
+              {
+                status === "active" && (
+                  <span class="info-dot" aria-hidden="true" />
+                )
+              }
               {statusLabel[status]}
             </dd>
           </div>
@@ -90,60 +111,104 @@ const statusLabel: Record<string, string> = {
             <dt class="info-label section-label">Stack</dt>
             <dd class="info-value">
               <ul class="stack-list">
-                {stack.map((tech) => (
-                  <li class="stack-pill">{tech}</li>
-                ))}
+                {stack.map((tech) => <li class="stack-pill">{tech}</li>)}
               </ul>
             </dd>
           </div>
 
-          {(url || github) && (
-            <div class="info-row info-row--links">
-              <dt class="info-label section-label">Links</dt>
-              <dd class="info-value">
-                <ul class="link-list">
-                  {url && (
-                    <li>
-                      <a class="info-link" href={url} target="_blank" rel="noopener">
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                          <path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Live site
-                      </a>
-                    </li>
-                  )}
-                  {github && (
-                    <li>
-                      <a class="info-link" href={github} target="_blank" rel="noopener">
-                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                          <path d="M1 9L9 1M9 1H3M9 1V7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        GitHub
-                      </a>
-                    </li>
-                  )}
-                </ul>
-              </dd>
-            </div>
-          )}
-
+          {
+            (projectUrl || githubUrl || status === "active") && (
+              <div class="info-row info-row--links">
+                <dt class="info-label section-label">Links</dt>
+                <dd class="info-value">
+                  <ul class="link-list">
+                    {projectUrl ? (
+                      <li>
+                        <a
+                          class="info-link"
+                          href={projectUrl}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          <svg
+                            width="10"
+                            height="10"
+                            viewBox="0 0 10 10"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M1 9L9 1M9 1H3M9 1V7"
+                              stroke="currentColor"
+                              stroke-width="1.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
+                          </svg>
+                          Live site
+                        </a>
+                      </li>
+                    ) : (
+                      <li>
+                        <span class="info-link info-link--muted">
+                          Coming soon
+                        </span>
+                      </li>
+                    )}
+                    {githubUrl && (
+                      <li>
+                        <a
+                          class="info-link"
+                          href={githubUrl}
+                          target="_blank"
+                          rel="noopener"
+                        >
+                          <svg
+                            width="10"
+                            height="10"
+                            viewBox="0 0 10 10"
+                            fill="none"
+                            aria-hidden="true"
+                          >
+                            <path
+                              d="M1 9L9 1M9 1H3M9 1V7"
+                              stroke="currentColor"
+                              stroke-width="1.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                            />
+                          </svg>
+                          GitHub
+                        </a>
+                      </li>
+                    )}
+                  </ul>
+                </dd>
+              </div>
+            )
+          }
         </dl>
       </aside>
 
-      {toc.length > 0 && (
-        <nav class="toc" aria-label="On this page">
-          <p class="toc__heading section-label">On this page</p>
-          <ol class="toc__list">
-            {toc.map((h, i) => (
-              <li class="toc__item" style={`padding-inline-start: ${(h.depth - 2) * 0.75}rem`}>
-                <a class="toc__link" href={`#${h.slug}`}>
-                  {String(i + 1).padStart(2, '0')}. {h.text}
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
-      )}
+      {
+        toc.length > 0 && (
+          <nav class="toc" aria-label="On this page">
+            <p class="toc__heading section-label">On this page</p>
+            <ol class="toc__list">
+              {toc.map((h, i) => (
+                <li
+                  class="toc__item"
+                  style={`padding-inline-start: ${(h.depth - 2) * 0.75}rem`}
+                >
+                  <a class="toc__link" href={`#${h.slug}`}>
+                    {String(i + 1).padStart(2, "0")}. {h.text}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
     </div>
 
     <!-- Article -->
@@ -153,7 +218,12 @@ const statusLabel: Record<string, string> = {
           <time datetime={startDate.toISOString()}>{fmtDate(startDate)}</time>
           <span class="project__type-badge">{type}</span>
         </div>
-        <h1 class="project__title" transition:name={`project-title-${project.id}`}>{title}</h1>
+        <h1
+          class="project__title"
+          transition:name={`project-title-${project.id}`}
+        >
+          {title}
+        </h1>
         <p class="project__description">{description}</p>
       </header>
 
@@ -225,7 +295,9 @@ const statusLabel: Record<string, string> = {
     line-height: 1.4;
   }
 
-  .info-capitalize { text-transform: capitalize; }
+  .info-capitalize {
+    text-transform: capitalize;
+  }
 
   .info-status {
     display: flex;
@@ -234,9 +306,15 @@ const statusLabel: Record<string, string> = {
     font-weight: 600;
   }
 
-  .info-status--active { color: var(--color-available); }
-  .info-status--complete { color: var(--color-text-muted); }
-  .info-status--archived { color: var(--color-text-muted); }
+  .info-status--active {
+    color: var(--color-available);
+  }
+  .info-status--complete {
+    color: var(--color-text-muted);
+  }
+  .info-status--archived {
+    color: var(--color-text-muted);
+  }
 
   .info-dot {
     position: relative;
@@ -250,7 +328,7 @@ const statusLabel: Record<string, string> = {
 
   @media (prefers-reduced-motion: no-preference) {
     .info-dot::after {
-      content: '';
+      content: "";
       position: absolute;
       inset: 0;
       border-radius: 50%;
@@ -260,7 +338,9 @@ const statusLabel: Record<string, string> = {
   }
 
   /* Stack pills */
-  .info-row--stack .info-value { display: block; }
+  .info-row--stack .info-value {
+    display: block;
+  }
 
   .stack-list {
     list-style: none;
@@ -305,7 +385,14 @@ const statusLabel: Record<string, string> = {
     transition: opacity 0.1s;
   }
 
-  .info-link:hover { opacity: 0.75; }
+  .info-link:hover {
+    opacity: 0.75;
+  }
+
+  .info-link--muted {
+    color: var(--color-text-muted);
+    opacity: 1;
+  }
 
   /* ToC — layout-specific overrides; shared styles are in global.css */
   .toc {
@@ -446,13 +533,13 @@ const statusLabel: Record<string, string> = {
 </style>
 
 <script>
-  import { initReadingProgress } from '../../lib/reading-progress'
-  import { initTocObserver } from '../../lib/toc-observer'
+  import { initReadingProgress } from "../../lib/reading-progress";
+  import { initTocObserver } from "../../lib/toc-observer";
 
   function initProject(): void {
-    initReadingProgress('reading-progress', '.project-article')
-    initTocObserver('.project__body h2, .project__body h3')
+    initReadingProgress("reading-progress", ".project-article");
+    initTocObserver(".project__body h2, .project__body h3");
   }
 
-  document.addEventListener('astro:page-load', initProject)
+  document.addEventListener("astro:page-load", initProject);
 </script>
