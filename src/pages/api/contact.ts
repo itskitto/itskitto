@@ -7,6 +7,7 @@ export const prerender = false
 const SITEVERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
 const TO_ADDRESS = 'hello@itskitto.dev'
 const FROM_ADDRESS = 'hello@itskitto.dev'
+const DEFAULT_TEMPLATE_ID = 'itskitto-contact-message'
 
 export const POST: APIRoute = async ({ request }) => {
   // ── Parse form data ──────────────────────────────────────────────────────
@@ -56,6 +57,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   // ── Send email via Resend ─────────────────────────────────────────────────
   const resend = new Resend(env.RESEND_API_KEY)
+  const templateId = env.RESEND_CONTACT_TEMPLATE_ID?.trim() || DEFAULT_TEMPLATE_ID
 
   const subjectLine = subject
     ? `[Contact] ${subject} — ${name}`
@@ -66,13 +68,15 @@ export const POST: APIRoute = async ({ request }) => {
     to: TO_ADDRESS,
     replyTo: `${name} <${email}>`,
     subject: subjectLine,
-    text: [
-      `Name:    ${name}`,
-      `Email:   ${email}`,
-      `Subject: ${subject || '(none)'}`,
-      '',
-      message,
-    ].join('\n'),
+    template: {
+      id: templateId,
+      variables: {
+        SENDER_NAME: name,
+        SENDER_EMAIL: email,
+        MESSAGE_SUBJECT: subject || '(none)',
+        MESSAGE_BODY: message,
+      },
+    },
   })
 
   if (error) {
