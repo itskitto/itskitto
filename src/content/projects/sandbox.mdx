@@ -9,26 +9,24 @@ startDate: 2025-11-01
 draft: false
 ---
 
-I've always had a problem with how I store and revisit technical work. Notes apps are fine for writing. GitHub is fine for code that's actually a project. But there's a large category of things that fall in between — a snippet that solves a problem I'll definitely run into again, a proof-of-concept that worked but never went anywhere, a diagram I drew while thinking through an architecture. These things end up scattered across apps, browser tabs, and half-finished gists, and I find them again mostly by luck.
+I've always had a problem with how I store and revisit technical work. Notes apps are fine for writing. GitHub is fine for code that's actually a project. But there's a large category of things that fall in between: a snippet that solves a problem I'll definitely run into again, a proof-of-concept that worked but never went anywhere, a diagram I drew while thinking through an architecture. These things end up scattered across apps, browser tabs, and half-finished gists, and I find them again mostly by luck.
 
-Sandbox is an attempt to build the thing I've wanted to use. The premise is spatial: instead of a list, content lives on a canvas. You can pan around it, group things by proximity, and get a sense of how ideas relate to each other in a way that a linear list doesn't give you. The influence is FigJam — I spend enough time there that the spatial model feels natural — but the content is code and technical notes rather than design artifacts.
+Sandbox is an attempt to build the thing I've wanted to use. The premise is a fun canvas: instead of a list, content lives on a live artifact. You can pan around it, group things, and get a sense of how ideas relate to each other in a way that traditional web content doesn't give you. The influence is FigJam. I spend enough time there that the canvas model feels natural, and the content here is code and technical notes rather than design artifacts.
 
 ## What it's for
 
-The primary use case is code snippets with context. A snippet by itself is often not enough to be useful later. The interesting part is usually why it exists, what problem it was solving, and what didn't work before landing on it. Sandbox lets me attach that context directly, so when I come back to something six months later I have the full picture.
+A snippet on its own is often not enough to be useful later. What matters is why it exists, what problem it was solving, and what didn't work before landing on it. Sandbox keeps that context attached to the code, so coming back six months later gives you the full picture rather than just the implementation.
 
-The secondary use case is POC tracking. When I'm evaluating a library or approach for a real project, I usually build a small proof of concept. Currently those live in throwaway repos that I forget about. Having them in one place, on a canvas where I can see which ones connected to which projects, is the version I want.
+The other main use case is POC tracking. When I'm evaluating a library or approach for a real project, I usually build a small proof of concept. Currently those live in throwaway repos I forget about. Having them in one place, on a canvas where I can see which ones connected to which projects, is the version I want.
 
 ## Decisions I'm making
 
-The hardest design decision so far is scope. A canvas-based tool has a natural tendency to expand — there's always another type of card, another way to connect things, another organizational feature. I'm trying to stay disciplined about what this is for. It's not a second brain app, it's not a wiki, it's not a project management tool. The constraint is: if you wouldn't put it on a whiteboard while thinking through a technical problem, it probably doesn't belong here.
+The hardest design decision so far is scope. A canvas-based tool has a natural tendency to expand: there's always another type of card, another way to connect things, another organizational feature. I'm trying to stay disciplined about what this is for. But ultimately the goal is to show a bit of personality and have fun with it.
 
-The data model is simple on purpose. Cards have content, a type, and a position. Connections between cards are optional and untyped — I haven't added relationship labels because I don't know yet whether I'll actually use them. I'd rather add that when I understand the need from using the thing than design it upfront.
-
-Supabase handles auth and persistence. Real-time sync across tabs was something I wanted from the start, and the Supabase realtime layer made that straightforward. The canvas state syncs without explicit save operations, which is the behavior I wanted — the closest analog to how a physical whiteboard works.
+I chose Supabase for auth and persistence partly because real-time sync across tabs was something I wanted from the start, and the realtime layer made that straightforward without much setup. The canvas state syncs without explicit save operations, which is the closest feel to how a physical whiteboard works.
 
 ## Current state
 
-The core canvas interaction is working: pan, zoom, create cards, move them around, resize. Basic code highlighting is in. The snippet card type is the most complete. POC cards exist but the format isn't settled — I'm still figuring out what metadata is actually useful there versus what I'm adding because it seems like it should be useful.
+The core canvas interaction is working: pan, zoom, create cards, move them around, resize. Basic code highlighting is in, and the snippet card type is the most complete. POC cards exist but the format isn't settled yet; I'm still figuring out what metadata is actually useful versus what I'm adding because it seems like it should be.
 
-I'm not sure yet when I'll open it up. It works for me, which is a start.
+This has been a super fun exercise, working within the constraints of a canvas, getting relatively complex components to render and function the way I want. I'm polishing some things but will be opening it up soon for people to get a look into all the little fun random things I tinker with.

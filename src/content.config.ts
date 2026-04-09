@@ -7,7 +7,7 @@ const posts = defineCollection({
     title: z.string(),
     description: z.string(),
     pubDate: z.coerce.date(),
-    category: z.enum(['General', 'React']),
+    category: z.enum(['General', 'React', 'CSS']),
     draft: z.boolean().default(false),
     ref: z.string().optional(),
     readTime: z.number().optional(),

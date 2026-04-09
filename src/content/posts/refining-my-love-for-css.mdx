@@ -1,0 +1,47 @@
+---
+title: Refining my love for CSS
+description: CSS gets treated like a necessary evil by a lot of developers. I think it's one of the most interesting and expressive languages in the stack, and a few people taught me how to actually see it that way.
+pubDate: 2026-02-16
+category: CSS
+draft: false
+readTime: 5
+ref: CSS
+---
+
+This article is part of an ongoing series where I write about the tools and ideas that have shaped how I build things. Some of these are deep dives, but this one is a bit more personal.
+
+CSS gets a bad reputation.
+
+I've been in enough engineering conversations to know the pattern. Someone mentions CSS and the room shifts. Half the people tune out, someone makes a joke about centering a div, and the discussion moves on to something that feels more "real." It's treated as a headache, a necessary evil you face to make things look acceptable, not a language worth thinking about seriously.
+
+And every time, I have to resist the urge to qualify it. Because I genuinely love CSS, and I find the dismissal kind of funny given how much more interesting it's gotten.
+
+## CSS is a design system language
+
+For a long time, that was me too. Something looks off, search for the property, apply it, move on. It worked until it didn't, until I'd have a codebase full of values that technically worked but didn't add up to anything. A random spacing value here, an arbitrary color there, breakpoints that got added when something broke.
+
+What eventually clicked was that CSS isn't a list of properties to memorise and apply. It's a language for describing how things visually relate to each other, and once that registers the whole thing opens up in a pretty exciting way. A color isn't just a hex code, it's a named role in a system. A spacing value isn't an arbitrary number, it's a position in a rhythm. A component doesn't have a fixed width, it has a relationship with its container and its content. You stop patching individual problems and start building something that actually holds together, and it gets genuinely fun to work in.
+
+## Why I think this gets overlooked
+
+CSS in the past was genuinely painful, and not in a character-building way. Browser inconsistency haunted you, the box model was confusing, float-based layouts were... a thing. Developers who came up during that era built rightful resent towards it.
+
+The CSS-in-JS movement made a lot of sense in that context. When the language doesn't have scoping, you build it. When you can't trust cascade behavior, you avoid it in total. These are solutions to very real, very frustrating prblems.
+
+But the language has genuinely made leaps and bounds. Cascade layers, `:has()`, container queries, logical properties, `color-mix()`, oklch, subgrid. People who wrote it off a decade ago haven't necessarily seen what CSS looks like now, and it's a pretty different picture with an exciting future to boot.
+
+There's also the fact that good CSS is invisible. A well-built design system just works, and nobody looks at consistent spacing and a coherent color palette and says "impressive engineering." They just say it looks good. Which is the goal, but it means the work involved goes largely unnoticed, which probably doesn't help the reputation.
+
+## The people who changed how I see this
+
+I didn't arrive at any of this on my own. The way I think about CSS today is largely shaped by the work of Kevin Powell, Josh Comeau, Andy Bell, and Sarah Drasner. If you're serious about getting better at CSS, spending time with any of their work is time well spent.
+
+## How I approach it
+
+In practice, I almost always start with tokens. It sounds a bit tedious but it pays off almost immediately. Before writing a single component style, I want the foundational values in place: color roles, a spacing scale, type sizing. The reason isn't discipline for its own sake, it's that components written against named tokens are a joy to work with compared to ones that aren't. `--color-surface` tells you something that `#f5f4f2` never will.
+
+From there, the thing that made the biggest difference was actually making peace with the cascade. Understanding specificity as feature, understanding why everything felt so fragile before modern updates, understanding that everything had its place changed everything for me. What helped solidify it all for me was giving everything a clear home: tokens in their own layer, global defaults in another, scoped component styles. Once that structure is there, CSS becomes something you can actually reason about rather than something that haunts you. Turns out it was never the problem, we were.
+
+The last piece is something I've come to really appreciate: designing for the content rather than against it. I want layouts that respond to what's inside them rather than forcing content into fixed containers. Less defensive CSS, fewer arbitrary breakpoints, components that just behave sensibly without a lot of intervention. It's less about specific techniques and more about the direction you're thinking in, and once you're oriented that way it starts to feel a bit like the CSS is working WITH you not AGAINST you.
+
+All in all, I believe CSS is genuinely worth the time to learn properly, not just the properties but the underlying model. The developers who find it frustrating are usually working without that mental model, and the ones who enjoy it have usually spent some time peeling back the layers to understand its quirks.
