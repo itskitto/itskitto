@@ -10,7 +10,6 @@ const FROM_ADDRESS = 'hello@itskitto.dev'
 const DEFAULT_TEMPLATE_ID = 'itskitto-contact-message'
 
 export const POST: APIRoute = async ({ request }) => {
-  // ── Parse form data ──────────────────────────────────────────────────────
   let data: FormData
   try {
     data = await request.formData()
@@ -24,7 +23,6 @@ export const POST: APIRoute = async ({ request }) => {
   const message = (data.get('message') as string | null)?.trim() ?? ''
   const token   = (data.get('cf-turnstile-response') as string | null) ?? ''
 
-  // ── Basic server-side validation ─────────────────────────────────────────
   if (!name || !email || !message) {
     return json({ error: 'Missing required fields.' }, 400)
   }
@@ -32,7 +30,6 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'Invalid email address.' }, 400)
   }
 
-  // ── Verify Turnstile token ────────────────────────────────────────────────
   if (!token) {
     return json({ error: 'Human verification required.' }, 400)
   }
@@ -55,7 +52,6 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'Verification failed. Please try again.' }, 400)
   }
 
-  // ── Send email via Resend ─────────────────────────────────────────────────
   const resend = new Resend(env.RESEND_API_KEY)
   const templateId = env.RESEND_CONTACT_TEMPLATE_ID?.trim() || DEFAULT_TEMPLATE_ID
 

@@ -101,27 +101,24 @@ const { messages = [], interval, right } = Astro.props;
 </style>
 
 <script>
-  function initNavToggle() {
-    const navToggle = document.getElementById("nav-toggle");
-    if (!navToggle) return;
+  function initNavToggle(): void {
+    const navToggle = document.getElementById('nav-toggle')
+    if (!navToggle) return
 
-    // Remove inline style on mobile so the CSS media query can show it.
-    // Inline styles override scoped CSS selectors, so this is the reliable guard.
-    if (window.matchMedia("(max-width: 48em)").matches) {
-      navToggle.style.removeProperty("display");
+    // Inline styles beat scoped CSS, so remove it on mobile to let the media query take over.
+    if (window.matchMedia('(max-width: 48em)').matches) {
+      navToggle.style.removeProperty('display')
     }
 
-    navToggle.addEventListener("click", () => {
-      const isOpen = document.documentElement.classList.toggle(
-        "sidebar-mobile-open",
-      );
-      navToggle.setAttribute("aria-expanded", String(isOpen));
+    navToggle.addEventListener('click', () => {
+      const isOpen = document.documentElement.classList.toggle('sidebar-mobile-open')
+      navToggle.setAttribute('aria-expanded', String(isOpen))
       if (isOpen) {
-        const sidebar = document.getElementById("sidebar");
-        sidebar?.querySelector<HTMLElement>("a, button")?.focus();
+        const sidebar = document.getElementById('sidebar')
+        sidebar?.querySelector<HTMLElement>('a, button')?.focus()
       }
-    });
+    })
   }
 
-  document.addEventListener("astro:page-load", initNavToggle);
+  document.addEventListener('astro:page-load', initNavToggle)
 </script>

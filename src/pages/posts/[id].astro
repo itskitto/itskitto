@@ -20,8 +20,7 @@ const nav = await getNav()
 
 const toc = headings.filter((h) => h.depth <= 3)
 
-// Extract external links from the post body for the sidebar refs panel.
-// Strip the explicit ## References section first to avoid duplication.
+// Strip the ## References section to avoid duplicating links already listed there.
 const bodyForRefs = (post.body ?? '').split('\n## References')[0]
 const linkRegex = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g
 const seenRefs = new Set<string>()
@@ -188,7 +187,6 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
     padding-block-start: var(--s1);
   }
 
-  /* ToC column — sticky, holds both ToC and refs */
   .toc-col {
     flex-shrink: 0;
     inline-size: 12rem;
@@ -212,7 +210,6 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
   }
 
   .toc-refs__heading {
-    /* base styles via .section-label */
     margin-block-end: 0.5rem;
   }
 
@@ -251,7 +248,6 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
     color: var(--color-brand);
   }
 
-  /* Post */
   .post {
     flex: 1;
     max-inline-size: 44rem;
@@ -259,7 +255,6 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
   }
 
   .post__meta {
-    /* base styles via .meta-row */
     margin-block-end: var(--s1);
   }
 
@@ -281,7 +276,6 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
     margin-block-end: var(--s2);
   }
 
-  /* Mobile ToC dropdown — hidden on desktop */
   .post-toc-dropdown {
     display: none;
   }
@@ -314,7 +308,6 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
     transform: scale(0.94);
   }
 
-  /* Prose styles for rendered markdown */
   .post__body :global(h2) {
     font-size: 1.25rem;
     font-weight: 700;
@@ -380,7 +373,6 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
       display: none;
     }
 
-    /* Mobile ToC dropdown */
     .post-toc-dropdown {
       display: block;
       border: var(--border-thin) solid var(--color-border);
@@ -427,7 +419,6 @@ while ((refMatch = linkRegex.exec(bodyForRefs)) !== null) {
     }
 
     .post-toc-dropdown__label {
-      /* base styles via .section-label */
       margin-block-end: 0.375rem;
     }
 

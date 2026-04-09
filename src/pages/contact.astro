@@ -20,19 +20,43 @@ const contactMethods = [
 
 <script
   is:inline
-  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=onTurnstileLoad"
   async
   defer
 ></script>
 
-<script is:inline>
-  function onTurnstileVerified() {
-    var footer = document.querySelector('.form-footer')
-    if (footer) footer.removeAttribute('hidden')
+<script is:inline define:vars={{ turnstileSiteKey }}>
+  function renderTurnstile() {
+    var container = document.getElementById('cf-turnstile-container')
+    if (!container || !window.turnstile || !turnstileSiteKey) return
+    if (container.hasChildNodes()) return
+    window.turnstile.render(container, {
+      sitekey: turnstileSiteKey,
+      theme: 'auto',
+      callback: function () {
+        var el = document.querySelector('.form-footer')
+        if (el) el.removeAttribute('hidden')
+      },
+      'expired-callback': function () {
+        var el = document.querySelector('.form-footer')
+        if (el) el.setAttribute('hidden', '')
+      },
+      'error-callback': function () {
+        var el = document.querySelector('.form-footer')
+        if (el) el.setAttribute('hidden', '')
+      },
+    })
   }
-  function onTurnstileExpired() {
-    var footer = document.querySelector('.form-footer')
-    if (footer) footer.setAttribute('hidden', '')
+
+  // First load: called by the CDN script once it's ready
+  window.onTurnstileLoad = renderTurnstile
+
+  // Re-render on View Transition navigations (turnstile already loaded)
+  if (!window._turnstileListenerAdded) {
+    window._turnstileListenerAdded = true
+    document.addEventListener('astro:page-load', function () {
+      if (window.turnstile) renderTurnstile()
+    })
   }
 </script>
 
@@ -121,14 +145,7 @@ const contactMethods = [
           </div>
 
           {turnstileSiteKey ? (
-            <div
-              class="cf-turnstile"
-              data-sitekey={turnstileSiteKey}
-              data-theme="auto"
-              data-callback="onTurnstileVerified"
-              data-expired-callback="onTurnstileExpired"
-              data-error-callback="onTurnstileExpired"
-            ></div>
+            <div id="cf-turnstile-container"></div>
           ) : (
             <p class="form-field-error">
               Human verification is temporarily unavailable. Please email hello@itskitto.dev instead.
@@ -463,7 +480,7 @@ const contactMethods = [
 </style>
 
 <script>
-  function initContactForm() {
+  function initContactForm(): void {
     const form = document.querySelector<HTMLFormElement>('.contact-form')
     if (!form) return
 
@@ -509,8 +526,7 @@ const contactMethods = [
       })
     }
 
-    function showError(message: string) {
-      // Show a general form-level error below the submit button
+    function showError(message: string): void {
       const existing = form!.querySelector('.form-general-error')
       existing?.remove()
       const el = document.createElement('p')
@@ -519,7 +535,7 @@ const contactMethods = [
       submitBtn?.insertAdjacentElement('afterend', el)
     }
 
-    function showSuccess() {
+    function showSuccess(): void {
       const section = form!.closest('.contact-form-section')
       const success = section?.querySelector<HTMLElement>('.form-success')
       if (success) {
@@ -535,14 +551,12 @@ const contactMethods = [
       const valid = required.map(validateField).every(Boolean)
       if (!valid) { shakeErrors(); return }
 
-      // Require Turnstile token before submitting
-      const token = (form!.querySelector<HTMLInputElement>('[name="cf-turnstile-response"]'))?.value
+      const token = form!.querySelector<HTMLInputElement>('[name="cf-turnstile-response"]')?.value
       if (!token) {
         showError('Please complete the human verification above.')
         return
       }
 
-      // Disable submit while in-flight
       if (submitBtn) {
         submitBtn.disabled = true
         submitBtn.textContent = 'Sending…'

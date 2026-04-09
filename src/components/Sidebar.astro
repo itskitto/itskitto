@@ -49,7 +49,6 @@ const pathname = Astro.url.pathname;
 ---
 
 <aside class="sidebar" id="sidebar">
-  <!-- Always visible: avatar + toggle -->
   <div class="sidebar__top">
     <a class="sidebar__avatar-link" href="/" aria-label="Home">
       {
@@ -80,7 +79,6 @@ const pathname = Astro.url.pathname;
     </button>
   </div>
 
-  <!-- Expanded content: hidden during collapse + expand animation -->
   <div class="sidebar__body">
     <div class="sidebar__identity">
       <p class="sidebar__name">{name}</p>
@@ -127,7 +125,6 @@ const pathname = Astro.url.pathname;
     }
   </div>
 
-  <!-- Collapsed-only: icon nav -->
   <nav class="sidebar__icon-nav" aria-label="Navigation">
     {
       nav.map((section) => {
@@ -187,7 +184,6 @@ const pathname = Astro.url.pathname;
       padding-inline 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* ─── Top row: avatar + toggle ─── */
   .sidebar__top {
     display: flex;
     align-items: center;
@@ -225,7 +221,6 @@ const pathname = Astro.url.pathname;
     transition: opacity 0.15s;
   }
 
-  /* ─── Toggle button ─── */
   .sidebar__toggle {
     flex-shrink: 0;
     display: flex;
@@ -258,14 +253,6 @@ const pathname = Astro.url.pathname;
     display: none;
   }
 
-  /* ─── Expanded body ─── */
-  /*
-   * Target-state transition trick:
-   *   - When EXPANDING (this is the target state): delay 0.35s so content waits
-   *     for the sidebar to reach full width, then fades in over 0.2s.
-   *   - When COLLAPSING (collapsed state is the target): that rule sets
-   *     transition: opacity 0s, so content disappears instantly — no reflow visible.
-   */
   .sidebar__body {
     display: flex;
     flex-direction: column;
@@ -277,7 +264,6 @@ const pathname = Astro.url.pathname;
     transition: opacity 0.15s ease 0.2s;
   }
 
-  /* Collapsed: instant hide + remove from layout flow */
   :global(html.sidebar-collapsed) .sidebar__body {
     position: absolute;
     visibility: hidden;
@@ -286,7 +272,6 @@ const pathname = Astro.url.pathname;
     transition: opacity 0s;
   }
 
-  /* ─── Identity ─── */
   .sidebar__name {
     font-size: 0.9rem;
     font-weight: 600;
@@ -300,7 +285,6 @@ const pathname = Astro.url.pathname;
     margin-block-start: 0.2rem;
   }
 
-  /* ─── CTA ─── */
   .sidebar__cta {
     display: flex;
     align-items: center;
@@ -359,14 +343,12 @@ const pathname = Astro.url.pathname;
     pointer-events: none;
   }
 
-  /* ─── Nav ─── */
   .sidebar__nav {
     display: flex;
     flex-direction: column;
     gap: var(--s1);
   }
 
-  /* ─── Availability ─── */
   .sidebar__availability {
     margin-block-start: auto;
   }
@@ -386,7 +368,6 @@ const pathname = Astro.url.pathname;
     line-height: 1.5;
   }
 
-  /* ─── Collapsed-only: icon nav ─── */
   .sidebar__icon-nav {
     display: none;
     flex-direction: column;
@@ -443,7 +424,6 @@ const pathname = Astro.url.pathname;
     opacity: 1;
   }
 
-  /* ─── Collapsed state overrides ─── */
   :global(html.sidebar-collapsed) .sidebar {
     padding-inline: 0.5rem;
   }
@@ -466,12 +446,10 @@ const pathname = Astro.url.pathname;
     display: flex;
   }
 
-  /* ─── Mobile: drawer overlay ─── */
   @media (max-width: 48em) {
     .sidebar {
       inline-size: min(20rem, 85dvw);
       transform: translateX(-100%);
-      /* Replace inline-size/padding transitions with transform */
       transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -479,7 +457,6 @@ const pathname = Astro.url.pathname;
       transform: translateX(0);
     }
 
-    /* Force full expanded content regardless of desktop collapsed state */
     :global(html.sidebar-collapsed) .sidebar {
       inline-size: min(20rem, 85dvw);
       padding-inline: var(--s1);
@@ -519,7 +496,7 @@ const pathname = Astro.url.pathname;
 </style>
 
 <script>
-  function initSidebar() {
+  function initSidebar(): void {
     const html = document.documentElement;
     const toggle = document.getElementById("sidebar-toggle");
     const scrim = document.getElementById("sidebar-scrim");
@@ -572,13 +549,10 @@ const pathname = Astro.url.pathname;
     });
   }
 
-  // Preserve sidebar-collapsed across ClientRouter page swaps.
-  // Astro replaces documentElement attributes from the incoming page's <html>,
-  // which has no sidebar-collapsed class, causing --sidebar-width to flash to
-  // its @property initial-value (13rem) and back — displacing the view-transition morph.
   document.addEventListener("astro:before-swap", (e) => {
+    const event = e as TransitionBeforeSwapEvent;
     if (document.documentElement.classList.contains("sidebar-collapsed")) {
-      e.newDocument.documentElement.classList.add("sidebar-collapsed");
+      event.newDocument.documentElement.classList.add("sidebar-collapsed");
     }
   });
 
