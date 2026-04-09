@@ -30,6 +30,7 @@ const nav = await getNav()
 
 <BaseLayout
   title={`Posts — ${categoryLabel}`}
+  description={`Writing on ${categoryLabel.toLowerCase()} — software engineering, systems design, and the craft of building things that work.`}
   sidebar={{ ...SIDEBAR, nav }}
   status={{ messages: STATUS_MESSAGES }}
 >

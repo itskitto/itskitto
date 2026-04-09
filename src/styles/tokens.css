@@ -20,7 +20,8 @@
   /* Base colors */
   --color-text: hsl(215 15% 12%);
   --color-text-secondary: hsl(215 10% 38%);
-  --color-text-muted: hsl(215 8% 58%);
+  --color-text-muted: hsl(215 12% 43%);
+  --color-brand-text: hsl(35 90% 30%);
   --color-bg: hsl(0 0% 100%);
   --color-border: hsl(35 15% 86%);
   --color-border-strong: hsl(35 15% 72%);
@@ -60,8 +61,8 @@
   --font-mono: 'JetBrains Mono', 'Cascadia Code', ui-monospace, monospace;
 
   /* Type scale */
-  --text-2xs: 0.65rem;
-  --text-xs: 0.7rem;
+  --text-2xs: 0.75rem;
+  --text-xs: 0.8125rem;
   --text-sm: 0.875rem;
   --text-base: 1rem;
   --text-lg: 1.125rem;
@@ -93,7 +94,8 @@
   :root {
     --color-text: hsl(35 10% 92%);
     --color-text-secondary: hsl(35 8% 65%);
-    --color-text-muted: hsl(35 6% 45%);
+    --color-text-muted: hsl(35 8% 58%);
+    --color-brand-text: hsl(35 92% 65%);
     --color-bg: hsl(215 18% 10%);
     --color-border: hsl(215 12% 22%);
     --color-border-strong: hsl(215 12% 32%);

@@ -8,10 +8,16 @@ export function initReadingProgress(barId: string, articleSelector: string): voi
   const article = document.querySelector<HTMLElement>(articleSelector)
   if (!bar || !article) return
 
+  let rafId: number | null = null
+
   function update(): void {
-    const { top, height } = article!.getBoundingClientRect()
-    const progress = -top / (height - window.innerHeight)
-    bar!.style.transform = `scaleX(${Math.max(0, Math.min(1, progress))})`
+    if (rafId !== null) return
+    rafId = requestAnimationFrame(() => {
+      rafId = null
+      const { top, height } = article!.getBoundingClientRect()
+      const progress = -top / (height - window.innerHeight)
+      bar!.style.transform = `scaleX(${Math.max(0, Math.min(1, progress))})`
+    })
   }
 
   document.addEventListener('scroll', update, { passive: true })

@@ -59,6 +59,8 @@ const pathname = Astro.url.pathname;
             alt={name}
             width={48}
             height={48}
+            fetchpriority="high"
+            loading="eager"
           />
         ) : (
           <div class="sidebar__avatar" aria-hidden="true">
@@ -325,7 +327,7 @@ const pathname = Astro.url.pathname;
     background: var(--color-chrome);
     color: var(--color-chrome-text);
     font-family: var(--font-mono);
-    font-size: 0.65rem;
+    font-size: var(--text-2xs);
     letter-spacing: 0.08em;
     white-space: nowrap;
     padding-block: 0.25rem;
@@ -350,7 +352,7 @@ const pathname = Astro.url.pathname;
   }
 
   .sidebar__availability-label {
-    font-size: 0.65rem;
+    font-size: var(--text-2xs);
     font-weight: 600;
     letter-spacing: 0.1em;
     text-transform: uppercase;
@@ -404,7 +406,7 @@ const pathname = Astro.url.pathname;
     background: var(--color-chrome);
     color: var(--color-chrome-text);
     font-family: var(--font-mono);
-    font-size: 0.65rem;
+    font-size: var(--text-2xs);
     letter-spacing: 0.08em;
     white-space: nowrap;
     padding-block: 0.25rem;
