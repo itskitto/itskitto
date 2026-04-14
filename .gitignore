@@ -22,6 +22,7 @@ pnpm-debug.log*
 
 .idea/
 .dev.vars
+.wrangler/
 .impeccable.md
 .vscode/
 .vscode/
