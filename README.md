@@ -1,6 +1,6 @@
 # Nicholas Khrangtong
 
-Full stack software engineer with 4+ years of experience building products across
+Full stack software engineer with 6+ years of experience building products across
 government, manufacturing, and small business environments. I work primarily in
 React, TypeScript, Rails, and Python, and I care as much about how work gets done
 as what gets built.
